@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { site } from '../data/site';
+---
+
+<Base
+  title="Polityka prywatności | S-Maal"
+  description="Polityka prywatności serwisu S-Maal — wersja przykładowa konceptu."
+  breadcrumbs={[{ name: 'Polityka prywatności', path: '/polityka-prywatnosci' }]}
+>
+  <PageHero
+    crumbs={[{ name: 'Polityka prywatności', path: '/polityka-prywatnosci' }]}
+    eyebrow="Dokument przykładowy"
+    title="Polityka prywatności"
+    lead="Treść poniżej jest szkicem do konceptu. Przed publikacją strony musi ją zweryfikować prawnik."
+  />
+  <section class="section">
+    <div class="wrap prose">
+      <h2>1. Administrator danych</h2>
+      <p>
+        Administratorem danych osobowych jest {site.name}, {site.street}, {site.postalCode} {site.city}. Kontakt w sprawach danych:
+        <a href={`mailto:${site.email}`}>{site.email}</a>.
+      </p>
+      <h2>2. Cel i podstawa przetwarzania</h2>
+      <p>
+        Dane z formularza konsultacji (imię, telefon, e-mail, lokalizacja, informacje o nieruchomości) przetwarzamy wyłącznie w
+        celu kontaktu i przygotowania oferty — na podstawie Twojej zgody (art. 6 ust. 1 lit. a RODO) oraz działań przed
+        zawarciem umowy (art. 6 ust. 1 lit. b RODO).
+      </p>
+      <h2>3. Okres przechowywania</h2>
+      <p>Dane przechowujemy do czasu zakończenia rozmów o współpracy, nie dłużej niż 12 miesięcy, chyba że zawrzemy umowę.</p>
+      <h2>4. Twoje prawa</h2>
+      <p>
+        Masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia, wycofania zgody w
+        dowolnym momencie oraz wniesienia skargi do Prezesa UODO.
+      </p>
+      <h2>5. Pliki cookies i analityka</h2>
+      <p>Serwis nie używa plików cookies ani narzędzi analitycznych. Fonty są serwowane z naszego serwera.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose {
+    max-width: 760px;
+  }
+  h2 {
+    font-size: 1.6rem;
+    margin: 40px 0 14px;
+  }
+  p {
+    font-size: 1.05rem;
+  }
+  a {
+    color: var(--brass);
+  }
+</style>

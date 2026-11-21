@@ -1,0 +1,69 @@
+---
+const steps = [
+  { t: 'Konsultacja', d: 'Spotykamy się na miejscu i rozmawiamy o stylu, budżecie i terminie. Konsultacja jest bezpłatna.' },
+  { t: 'Doradztwo', d: 'Pomagamy wybrać płytki, podłogi, drzwi i armaturę — tak, żeby pasowały do siebie i do budżetu.' },
+  { t: 'Kosztorys', d: 'Rozpisujemy kosztorys na pozycje, razem z materiałami. Cena z umowy nie zmienia się w trakcie prac.' },
+  { t: 'Realizacja', d: 'U Ciebie pracuje stała ekipa z kierownikiem. Co tydzień wysyłamy zdjęcia z postępu prac.' },
+  { t: 'Odbiór', d: 'Odbieramy prace razem z Tobą i sprzątamy — sprzątanie jest wliczone w cenę. Zostaje tylko wnieść meble.' },
+];
+---
+
+<section id="proces" class="proces dark">
+  <div class="wrap steps-wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Proces</span>
+      <h2>Jak <em>pracujemy</em></h2>
+    </div>
+    <ol class="steps">
+      {
+        steps.map((s, i) => (
+          <li data-reveal data-delay={i * 0.08}>
+            <span class="i">0{i + 1}</span>
+            <h3>{s.t}</h3>
+            <p class="muted">{s.d}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .i {
+    font: 600 0.75rem/1.9 var(--sans);
+    letter-spacing: 0.12em;
+    color: var(--brass);
+  }
+  .steps-wrap {
+    padding-block: clamp(80px, 10vw, 140px);
+  }
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+  }
+  .steps li {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--brass);
+  }
+  .steps p {
+    font-size: 0.93rem;
+  }
+
+  @media (max-width: 1000px) {
+    .steps {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

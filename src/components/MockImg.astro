@@ -1,0 +1,61 @@
+---
+import { Picture } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  sizes?: string;
+  widths?: number[];
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  before?: boolean; // filtr "surowy beton" dla suwaka przed/po
+}
+
+const { src, alt, sizes = '100vw', widths = [480, 800, 1200, 1600], class: cls, loading = 'lazy', before } = Astro.props;
+---
+
+<figure class:list={['mock', cls, { before }]}>
+  <Picture src={src} alt={alt} sizes={sizes} widths={widths} formats={['avif', 'webp']} loading={loading} />
+  <figcaption class="badge">Przykładowa wizualizacja</figcaption>
+</figure>
+
+<style>
+  .mock {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+  }
+  .mock :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(22, 21, 19, 0.62);
+    backdrop-filter: blur(6px);
+    color: #f3eee6;
+    font: 600 0.62rem/1.2 var(--sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .before :global(img) {
+    filter: grayscale(1) contrast(0.82) brightness(0.92) sepia(0.12);
+  }
+  .before::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.08), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.035) 0 2px, transparent 2px 5px),
+      rgba(120, 115, 108, 0.32);
+    mix-blend-mode: multiply;
+  }
+</style>

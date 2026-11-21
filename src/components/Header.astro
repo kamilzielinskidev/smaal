@@ -1,0 +1,144 @@
+---
+import { nav } from '../data/site';
+---
+
+<header class="site-header">
+  <div class="bar">
+    <a href="/" class="logo" aria-label="S-Maal — strona główna">S<span>-</span>MAAL</a>
+    <nav aria-label="Główna nawigacja">
+      <ul>
+        {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      </ul>
+    </nav>
+    <a href="/#kontakt" class="btn cta">Umów konsultację</a>
+    <button class="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector('.site-header')!;
+  const burger = header.querySelector('.burger')!;
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  burger.addEventListener('click', () => {
+    const open = document.documentElement.classList.toggle('nav-open');
+    burger.setAttribute('aria-expanded', String(open));
+  });
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    color: var(--stone);
+    transition:
+      background 0.4s,
+      backdrop-filter 0.4s;
+  }
+  .site-header.scrolled {
+    background: rgba(22, 21, 19, 0.82);
+    backdrop-filter: blur(14px);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    width: min(100% - 2 * var(--gutter), 1500px);
+    margin-inline: auto;
+    height: 76px;
+  }
+  .logo {
+    font: 500 1.45rem/1 var(--serif);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    margin-right: auto;
+  }
+  .logo span {
+    color: var(--brass);
+  }
+  ul {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    text-decoration: none;
+    font-size: 0.92rem;
+    opacity: 0.82;
+    transition: opacity 0.3s;
+  }
+  nav a:hover {
+    opacity: 1;
+  }
+  .cta {
+    padding: 12px 20px;
+    font-size: 0.88rem;
+  }
+  .burger {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    position: relative;
+  }
+  .burger span {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform 0.4s var(--ease);
+  }
+  .burger span:first-child {
+    top: 17px;
+  }
+  .burger span:last-child {
+    top: 26px;
+  }
+
+  @media (max-width: 960px) {
+    .cta {
+      display: none;
+    }
+    .burger {
+      display: block;
+    }
+    nav {
+      position: fixed;
+      inset: 76px 0 0;
+      background: var(--ink);
+      padding: 40px var(--gutter);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    ul {
+      flex-direction: column;
+      gap: 22px;
+    }
+    nav a {
+      font: 400 2rem/1.1 var(--serif);
+      opacity: 1;
+    }
+    :global(.nav-open) nav {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    :global(.nav-open) .site-header {
+      background: var(--ink);
+    }
+    :global(.nav-open) .burger span:first-child {
+      transform: translateY(4.5px) rotate(45deg);
+    }
+    :global(.nav-open) .burger span:last-child {
+      transform: translateY(-4.5px) rotate(-45deg);
+    }
+  }
+</style>

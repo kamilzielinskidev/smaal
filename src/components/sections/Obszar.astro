@@ -1,0 +1,176 @@
+---
+import { getCollection } from 'astro:content';
+import { cities, site } from '../../data/site';
+
+const pages = new Set((await getCollection('miasta')).map((m) => m.id));
+// Projekcja równoodległościowa w km względem Mikołowa (wystarczy w skali województwa).
+const KM_LON = 111.32 * Math.cos((site.geo.lat * Math.PI) / 180);
+const KM_LAT = 110.57;
+const points = cities.map((c) => ({
+  ...c,
+  x: (c.lon - site.geo.lon) * KM_LON,
+  y: -(c.lat - site.geo.lat) * KM_LAT,
+  hq: c.slug === 'mikolow',
+  href: pages.has(c.slug) ? `/wykonczenia-wnetrz-${c.slug}` : null,
+}));
+const km = (from: string) => {
+  const c = points.find((p) => p.slug === from)!;
+  return Math.round(Math.hypot(c.x, c.y));
+};
+---
+
+<section id="obszar" class="section obszar">
+  <div class="wrap grid">
+    <div class="text" data-reveal>
+      <span class="eyebrow">Obszar działania</span>
+      <h2>Z Mikołowa na <em>cały</em> Śląsk</h2>
+      <p class="muted">
+        Mikołów to nasza baza i magazyn. Do Katowic mamy {km('katowice')} km, do Tychów {km('tychy')} km, do Gliwic {
+          km('gliwice')
+        } km — dlatego na budowie jesteśmy codziennie, a nie „kiedy po drodze”.
+      </p>
+      <ul class="chips">
+        {
+          points
+            .filter((p) => !p.hq)
+            .map((p) => (
+              <li>{p.href ? <a href={p.href}>{p.name}</a> : <span>{p.name}</span>}</li>
+            ))
+        }
+      </ul>
+    </div>
+
+    <figure class="map" data-reveal data-delay="0.1">
+      <svg viewBox="-46 -44 92 90" role="img" aria-label="Mapa miast, w których realizujemy wykończenia, wokół Mikołowa">
+        {
+          [10, 25, 40].map((r) => (
+            <g class="ring">
+              <circle r={r} />
+              <text y={-r - 1.2}>{r} km</text>
+            </g>
+          ))
+        }
+        {
+          points.map((p) => {
+            const dot = (
+              <g class:list={['city', { hq: p.hq, linked: p.href }]} transform={`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`}>
+                {p.hq && <circle class="pulse" r="2" />}
+                <circle r={p.hq ? 1.4 : 0.8} />
+                <text x={p.side === 'left' ? -1.8 : 1.8} y="0.9" text-anchor={p.side === 'left' ? 'end' : 'start'}>
+                  {p.hq ? `${p.name} · siedziba` : p.name}
+                </text>
+              </g>
+            );
+            return p.href ? <a href={p.href}>{dot}</a> : dot;
+          })
+        }
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+  .text {
+    display: grid;
+    gap: 22px;
+  }
+  .chips {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips li > * {
+    display: inline-block;
+    font-size: 0.85rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .chips a {
+    border-color: var(--brass);
+    color: var(--ink);
+    background: rgba(176, 141, 87, 0.12);
+  }
+  .chips a:hover {
+    background: var(--brass);
+  }
+  .map {
+    margin: 0;
+    aspect-ratio: 92 / 90;
+    background: radial-gradient(circle at 50% 49%, #fff 0, rgba(255, 255, 255, 0) 55%);
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .ring circle {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 0.15;
+    stroke-dasharray: 0.6 0.8;
+    opacity: 0.7;
+  }
+  .ring text {
+    font: 600 1.5px var(--sans);
+    fill: var(--brass);
+    text-anchor: middle;
+    letter-spacing: 0.1px;
+  }
+  .city circle {
+    fill: var(--ink);
+  }
+  .city text {
+    font: 500 2.1px var(--sans);
+    fill: var(--ink);
+  }
+  .city.linked circle {
+    fill: var(--brass);
+  }
+  .city.linked text {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--brass);
+  }
+  a:hover .city text {
+    fill: var(--brass);
+  }
+  .city.hq circle {
+    fill: var(--brass);
+  }
+  .city.hq text {
+    font: 400 2.8px var(--serif);
+  }
+  .pulse {
+    fill: var(--brass);
+    opacity: 0.35;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulse 2.4s var(--ease) infinite;
+  }
+  @keyframes pulse {
+    from {
+      transform: scale(0.6);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

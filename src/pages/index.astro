@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/sections/Hero.astro';
+import Realizacje from '../components/sections/Realizacje.astro';
+import Uslugi from '../components/sections/Uslugi.astro';
+import Proces from '../components/sections/Proces.astro';
+import Kalkulator from '../components/sections/Kalkulator.astro';
+import Opinie from '../components/sections/Opinie.astro';
+import Obszar from '../components/sections/Obszar.astro';
+import Faq from '../components/sections/Faq.astro';
+import Kontakt from '../components/Kontakt.astro';
+import { faqJsonLd } from '../data/faq';
+---
+
+<Base title="Wykończenia wnętrz pod klucz na Śląsku | S-Maal Mikołów" jsonLd={[faqJsonLd()]}>
+  <Hero />
+  <Realizacje />
+  <Uslugi />
+  <Proces />
+  <Kalkulator />
+  <Opinie />
+  <Obszar />
+  <Faq />
+  <Kontakt />
+</Base>

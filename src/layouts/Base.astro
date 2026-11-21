@@ -1,0 +1,144 @@
+---
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, businessJsonLd } from '../data/site';
+import ogDefault from '../assets/img/salon-3.jpg';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: ImageMetadata;
+  jsonLd?: object[];
+  breadcrumbs?: { name: string; path: string }[];
+}
+
+const { title, description = site.description, image = ogDefault, jsonLd = [], breadcrumbs } = Astro.props;
+// build.format 'file' daje w pathname końcówkę .html — canonical ma wskazywać czysty URL
+const canonical = new URL(Astro.url.pathname.replace(/(\/index)?\.html$/, '') || '/', Astro.site).href;
+const og = await getImage({ src: image, width: 1200, height: 630, format: 'jpg' });
+const ogUrl = new URL(og.src, Astro.site).href;
+
+const schemas: object[] = [businessJsonLd(new URL('/', Astro.site).href), ...jsonLd];
+if (breadcrumbs) {
+  schemas.push({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [{ name: 'Strona główna', path: '/' }, ...breadcrumbs].map((b, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: b.name,
+      item: new URL(b.path, Astro.site).href,
+    })),
+  });
+}
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#161513" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) d.classList.add('reduce');
+        var gl = false;
+        try {
+          var c = document.createElement('canvas');
+          gl = !!(c.getContext('webgl2') || c.getContext('webgl'));
+        } catch (e) {}
+        if (reduce || !gl || (navigator.deviceMemory || 8) < 4) d.classList.add('no-3d');
+      })();
+    </script>
+    {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    <p class="concept-pill" role="note">Koncept · treści, zdjęcia, ceny i opinie przykładowe</p>
+
+    <script>
+      import Lenis from 'lenis';
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+      const reduce = document.documentElement.classList.contains('reduce');
+
+      if (!reduce) {
+        const lenis = new Lenis({ lerp: 0.09 });
+        (window as any).lenis = lenis;
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((t) => lenis.raf(t * 1000));
+        gsap.ticker.lagSmoothing(0);
+
+        gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
+          gsap.to(el, {
+            opacity: 1,
+            y: 0,
+            duration: 1.2,
+            ease: 'expo.out',
+            delay: Number(el.dataset.delay || 0),
+            scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+          });
+        });
+      }
+
+      // Kotwice na tej samej stronie — płynnie przez Lenis.
+      document.addEventListener('click', (e) => {
+        const a = (e.target as Element).closest('a[href*="#"]') as HTMLAnchorElement | null;
+        if (!a || a.pathname !== location.pathname) return;
+        const target = document.querySelector(a.hash);
+        if (!target) return;
+        e.preventDefault();
+        document.documentElement.classList.remove('nav-open');
+        const lenis = (window as any).lenis;
+        lenis ? lenis.scrollTo(target, { duration: 1.6 }) : target.scrollIntoView();
+        history.replaceState(null, '', a.hash);
+      });
+
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    </script>
+
+    <style>
+      .concept-pill {
+        position: fixed;
+        left: 16px;
+        bottom: 16px;
+        z-index: 60;
+        margin: 0;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(22, 21, 19, 0.78);
+        backdrop-filter: blur(10px);
+        color: var(--stone);
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        border: 1px solid rgba(176, 141, 87, 0.5);
+        pointer-events: none;
+        max-width: calc(100vw - 32px);
+      }
+    </style>
+  </body>
+</html>

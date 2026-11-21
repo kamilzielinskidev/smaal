@@ -1,0 +1,99 @@
+---
+// Opinie przykładowe — do podmiany na prawdziwe (np. z wizytówki Google).
+const reviews = [
+  {
+    text: 'Odebraliśmy mieszkanie tydzień przed terminem z harmonogramu. Co piątek dostawaliśmy zdjęcia z budowy, więc nie musieliśmy jeździć z Krakowa.',
+    who: 'Anna i Michał',
+    where: 'Katowice, 92 m²',
+  },
+  {
+    text: 'Najbardziej doceniam kosztorys — każda pozycja rozpisana, a cena z umowy była ceną końcową. Łazienka w spieku wygląda jak z katalogu.',
+    who: 'Tomasz',
+    where: 'Gliwice, 64 m²',
+  },
+  {
+    text: 'Dom pod klucz w niecałe pół roku. Ekipa sprzątała po sobie codziennie, a kierownik odbierał telefon zawsze — nawet w sobotę.',
+    who: 'Katarzyna',
+    where: 'Mikołów, 186 m²',
+  },
+];
+---
+
+<section class="section opinie">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Opinie</span>
+      <h2>Mówią nasi <em>klienci</em></h2>
+      <p class="muted">Opinie poniżej są przykładowe — w wersji produkcyjnej podepniemy prawdziwe recenzje.</p>
+    </div>
+    <div class="grid">
+      {
+        reviews.map((r, i) => (
+          <figure class="review" data-reveal data-delay={i * 0.1}>
+            <span class="tag">Opinia przykładowa</span>
+            <div class="stars" aria-label="5 na 5">
+              ★★★★★
+            </div>
+            <blockquote>„{r.text}”</blockquote>
+            <figcaption>
+              <strong>{r.who}</strong>
+              <span class="muted">{r.where}</span>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .opinie {
+    background: var(--stone-2);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .review {
+    position: relative;
+    margin: 0;
+    padding: 36px 32px;
+    display: grid;
+    gap: 18px;
+    align-content: start;
+    background: var(--stone);
+    border-radius: 20px;
+  }
+  .tag {
+    justify-self: start;
+    font: 600 0.62rem/1 var(--sans);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px dashed var(--muted);
+    color: var(--muted);
+  }
+  .stars {
+    color: var(--brass);
+    letter-spacing: 0.2em;
+  }
+  blockquote {
+    margin: 0;
+    font: 380 1.25rem/1.45 var(--serif);
+  }
+  figcaption {
+    display: grid;
+    gap: 2px;
+    font-size: 0.9rem;
+  }
+  strong {
+    font-weight: 600;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,289 @@
+---
+import HeroScene from '../../three/HeroScene';
+import MockImg from '../MockImg.astro';
+import fallback from '../../assets/img/salon-3.jpg';
+import { heroStages } from '../../lib/stages';
+---
+
+<section id="hero" class="hero dark" aria-labelledby="hero-title">
+  <div class="sticky">
+    <MockImg src={fallback} alt="Wykończony salon z jadalnią — przykład" class="fallback" />
+    <HeroScene client:only="react" />
+    <div class="shade" aria-hidden="true"></div>
+
+    <div class="wrap copy">
+      <span class="eyebrow">Mikołów · cały Śląsk</span>
+      <h1 id="hero-title">Wykończenia wnętrz <em>pod&nbsp;klucz</em> na&nbsp;Śląsku</h1>
+      <p class="lead">
+        Zajmujemy się kompleksowym wykończeniem mieszkań i domów — od stanu deweloperskiego do oddania kluczy. Doradzamy przy wyborze materiałów i pilnujemy terminów.
+      </p>
+      <div class="actions">
+        <a href="#kontakt" class="btn">Umów bezpłatną konsultację</a>
+        <a href="#kalkulator" class="btn ghost">Policz koszt</a>
+      </div>
+    </div>
+
+    <ol class="wrap stages" aria-label="Etapy wykończenia">
+      {
+        heroStages.map((s, i) => (
+          <li class:list={['stage', { active: i === 0 }]}>
+            <span class="n">
+              {s.n} <span class="of">/ 0{heroStages.length}</span>
+            </span>
+            <p class="t">{s.title}</p>
+            <p class="d">{s.text}</p>
+          </li>
+        ))
+      }
+      <span class="bar" aria-hidden="true"><span></span></span>
+    </ol>
+
+    <p class="hint" aria-hidden="true">Przewiń, aby wykończyć mieszkanie</p>
+  </div>
+</section>
+
+<script>
+  import { heroStages, sectionProgress, seg } from '../../lib/stages';
+
+  const hero = document.getElementById('hero')!;
+  if (!document.documentElement.classList.contains('no-3d')) {
+    const stages = [...hero.querySelectorAll<HTMLElement>('.stage')];
+    const bar = hero.querySelector<HTMLElement>('.bar span')!;
+    const fade = hero.querySelectorAll<HTMLElement>('.copy, .hint');
+    let last = 0;
+    const update = () => {
+      const p = sectionProgress(hero);
+      let idx = 0;
+      heroStages.forEach((s, i) => p >= s.at && (idx = i));
+      if (idx !== last) {
+        stages.forEach((el, i) => el.classList.toggle('active', i === idx));
+        last = idx;
+      }
+      bar.style.transform = `scaleX(${p})`;
+      const f = seg(p, 0.015, 0.09);
+      fade.forEach((el) => {
+        el.style.opacity = String(1 - f);
+        el.style.transform = `translateY(${-f * 50}px)`;
+        el.style.visibility = f >= 1 ? 'hidden' : '';
+      });
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+</script>
+
+<style>
+  .hero {
+    height: 420vh;
+    position: relative;
+  }
+  .sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+  }
+  .sticky :global(.hero-canvas),
+  .sticky :global(.fallback) {
+    position: absolute;
+    inset: 0;
+  }
+  .sticky :global(.fallback) {
+    display: none;
+  }
+  .shade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(22, 21, 19, 0.85) 0%, rgba(22, 21, 19, 0.35) 38%, transparent 60%);
+  }
+  .copy {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    translate: 0 -55%;
+    display: grid;
+    gap: 26px;
+    justify-items: start;
+  }
+  .copy h1 {
+    font-size: clamp(2.8rem, 6.4vw, 6rem);
+    max-width: 9.5em;
+  }
+  .lead {
+    max-width: 30em;
+    font-size: 1.1rem;
+    color: #d6cfc3;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .stages {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: clamp(28px, 6vh, 64px);
+    list-style: none;
+    padding: 0;
+    height: 150px;
+  }
+  .stage {
+    position: absolute;
+    left: 0;
+    bottom: 14px;
+    max-width: 380px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.5s var(--ease),
+      transform 0.6s var(--ease);
+  }
+  .stage.active {
+    opacity: 1;
+    transform: none;
+  }
+  .n {
+    font: 600 0.75rem/1 var(--sans);
+    letter-spacing: 0.18em;
+    color: var(--brass);
+  }
+  .of {
+    color: var(--muted-dark);
+  }
+  .t {
+    font: 380 1.7rem/1.1 var(--serif);
+    margin: 10px 0 6px;
+  }
+  .d {
+    font-size: 0.95rem;
+    color: var(--muted-dark);
+  }
+  .bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: min(380px, 100%);
+    height: 1px;
+    background: var(--line-dark);
+  }
+  .bar span {
+    position: absolute;
+    inset: 0;
+    background: var(--brass);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    translate: -50% 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted-dark);
+    padding-bottom: 46px;
+  }
+  .hint::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(var(--brass), transparent);
+    animation: drip 2s var(--ease) infinite;
+  }
+  @keyframes drip {
+    0% {
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    50% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+    51% {
+      transform-origin: bottom;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+  }
+
+  /* bez 3D: zwykły hero ze zdjęciem i wszystkimi etapami */
+  :global(.no-3d) .hero {
+    height: auto;
+  }
+  :global(.no-3d) .sticky {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+    padding: 140px 0 60px;
+  }
+  :global(.no-3d) .sticky :global(.fallback) {
+    display: block;
+  }
+  .sticky :global(.fallback .badge) {
+    top: 92px;
+  }
+  :global(.no-3d) .shade {
+    background: linear-gradient(90deg, rgba(22, 21, 19, 0.9), rgba(22, 21, 19, 0.55));
+  }
+  :global(.no-3d) .copy,
+  :global(.no-3d) .stages {
+    position: relative;
+    translate: none;
+    top: auto;
+    bottom: auto;
+    height: auto;
+  }
+  :global(.no-3d) .stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 28px;
+    margin-top: 60px;
+  }
+  :global(.no-3d) .stage {
+    position: static;
+    opacity: 1;
+    transform: none;
+  }
+  :global(.no-3d) .bar,
+  :global(.no-3d) .hint {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .shade {
+      background: linear-gradient(180deg, rgba(22, 21, 19, 0.92) 0%, rgba(22, 21, 19, 0.4) 42%, transparent 60%, rgba(22, 21, 19, 0.85) 82%);
+    }
+    .copy {
+      top: 96px;
+      translate: none;
+      gap: 18px;
+    }
+    .copy h1 {
+      font-size: clamp(2.4rem, 11vw, 3.2rem);
+    }
+    .lead {
+      font-size: 1rem;
+    }
+    .stages {
+      bottom: 64px;
+      height: 130px;
+    }
+    .t {
+      font-size: 1.4rem;
+    }
+    .hint {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,111 @@
+---
+import MockImg from './MockImg.astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  sizes?: string;
+}
+const { src, alt, sizes } = Astro.props;
+---
+
+<div class="ba" style="--pos: 50%">
+  <MockImg src={src} alt={`${alt} — po wykończeniu`} sizes={sizes} class="ba-after" />
+  <MockImg src={src} alt={`${alt} — stan przed`} sizes={sizes} class="ba-before" before />
+  <span class="ba-line" aria-hidden="true"><span></span></span>
+  <span class="ba-tag l">Przed</span>
+  <span class="ba-tag r">Po</span>
+  <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Porównaj stan przed i po" />
+</div>
+
+<script>
+  document.addEventListener('input', (e) => {
+    const el = e.target as HTMLInputElement;
+    if (el.classList?.contains('ba-range')) el.parentElement!.style.setProperty('--pos', el.value + '%');
+  });
+</script>
+
+<style>
+  .ba {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3 / 2;
+    background: var(--stone-2);
+  }
+  .ba :global(.mock) {
+    position: absolute;
+    inset: 0;
+  }
+  .ba :global(.ba-before) {
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+  .ba-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--stone);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .ba-line span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 46px;
+    height: 46px;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: var(--stone);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  }
+  .ba-line span::before {
+    content: '‹ ›';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    font: 600 1rem/1 var(--sans);
+    letter-spacing: 0.2em;
+    padding-left: 0.2em;
+  }
+  .ba-tag {
+    position: absolute;
+    bottom: 14px;
+    z-index: 3;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(22, 21, 19, 0.7);
+    color: var(--stone);
+    font: 600 0.7rem/1.2 var(--sans);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .ba-tag.l {
+    left: 14px;
+  }
+  .ba-tag.r {
+    right: 14px;
+  }
+  .ba-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    z-index: 4;
+  }
+  .ba-range:focus-visible + * {
+    outline: none;
+  }
+  .ba:has(.ba-range:focus-visible) {
+    outline: 2px solid var(--brass);
+    outline-offset: 3px;
+  }
+</style>

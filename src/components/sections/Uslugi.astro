@@ -1,0 +1,114 @@
+---
+import MockImg from '../MockImg.astro';
+import salon from '../../assets/img/salon.jpg';
+import dom from '../../assets/img/dom.jpg';
+import lazienka from '../../assets/img/lazienka.jpg';
+import kuchnia from '../../assets/img/kuchnia.jpg';
+
+const services = [
+  {
+    img: salon,
+    title: 'Mieszkania pod klucz',
+    text: 'Zajmujemy się mieszkaniami od stanu deweloperskiego aż po oddanie kluczy. Wszystkie prace prowadzimy w jednym harmonogramie.',
+    points: ['Tynki, gładzie, zabudowy GK', 'Podłogi i drzwi', 'Elektryka i hydraulika'],
+  },
+  {
+    img: dom,
+    title: 'Domy jednorodzinne',
+    text: 'Wykańczamy domy jednorodzinne — od tynków i gładzi po malowanie i biały montaż.',
+    points: ['Tynki, gładzie, malowanie', 'Podłogi i płytki', 'Biały montaż i drzwi'],
+  },
+  {
+    img: lazienka,
+    title: 'Łazienki',
+    text: 'Robimy łazienki od surowych ścian: hydroizolacja, płytki, odpływy liniowe, stelaże podtynkowe i biały montaż.',
+    points: ['Hydroizolacja', 'Płytki wielkoformatowe', 'Biały montaż'],
+  },
+  {
+    img: kuchnia,
+    title: 'Kuchnie',
+    text: 'Przygotowujemy kuchnię pod zabudowę: instalacje, ściany, podłogi i płytki nad blatem.',
+    points: ['Instalacje pod zabudowę', 'Płytki i spieki nad blatem', 'Podłogi i oświetlenie'],
+  },
+];
+---
+
+<section id="uslugi" class="section">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Zakres usług</span>
+      <h2>Czym się <em>zajmujemy</em></h2>
+    </div>
+    <div class="grid">
+      {
+        services.map((s, i) => (
+          <article class="svc" data-reveal data-delay={(i % 2) * 0.12}>
+            <MockImg src={s.img} alt={s.title} sizes="(min-width: 900px) 45vw, 92vw" />
+            <div class="body">
+              <span class="num">0{i + 1}</span>
+              <h3>{s.title}</h3>
+              <p class="muted">{s.text}</p>
+              <ul>
+                {s.points.map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(32px, 4vw, 64px) clamp(24px, 3vw, 48px);
+  }
+  .svc:nth-child(even) {
+    margin-top: clamp(0px, 8vw, 120px);
+  }
+  .svc :global(.mock) {
+    aspect-ratio: 4 / 3;
+  }
+  .svc :global(img) {
+    transition: transform 1.2s var(--ease);
+  }
+  .svc:hover :global(img) {
+    transform: scale(1.05);
+  }
+  .body {
+    display: grid;
+    gap: 10px;
+    padding-top: 22px;
+  }
+  .num {
+    font: 600 0.75rem/1 var(--sans);
+    letter-spacing: 0.18em;
+    color: var(--brass);
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  li {
+    font-size: 0.82rem;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .svc:nth-child(even) {
+      margin-top: 0;
+    }
+  }
+</style>

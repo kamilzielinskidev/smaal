@@ -1,0 +1,185 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import BeforeAfter from '../components/BeforeAfter.astro';
+import Kontakt from '../components/Kontakt.astro';
+import { standards } from '../data/pricing';
+import fallback from '../assets/img/salon.jpg';
+
+export async function getStaticPaths() {
+  const miasta = await getCollection('miasta');
+  return miasta.map((m) => ({ params: { miasto: m.id }, props: { m } }));
+}
+
+const { m } = Astro.props;
+const { Content } = await render(m);
+const items = (await getCollection('realizacje', (r) => r.data.city === m.id)).sort((a, b) => a.data.order - b.data.order);
+const fmt = new Intl.NumberFormat('pl-PL');
+const path = `/wykonczenia-wnetrz-${m.id}`;
+---
+
+<Base
+  title={`${m.data.title} | S-Maal`}
+  description={m.data.description}
+  image={items[0]?.data.cover ?? fallback}
+  breadcrumbs={[{ name: `Wykończenia wnętrz ${m.data.name}`, path }]}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      serviceType: 'Wykończenia wnętrz pod klucz',
+      provider: { '@type': 'HomeAndConstructionBusiness', name: 'S-Maal' },
+      areaServed: { '@type': 'City', name: m.data.name },
+    },
+  ]}
+>
+  <PageHero
+    crumbs={[{ name: `Wykończenia wnętrz ${m.data.name}`, path }]}
+    eyebrow={m.data.distance}
+    title={m.data.title}
+    lead={m.data.description}
+  >
+    <a href="#kontakt" class="btn">Umów konsultację {m.data.locative}</a>
+  </PageHero>
+
+  <section class="section">
+    <div class="wrap intro">
+      <div class="prose" data-reveal><Content /></div>
+      <aside data-reveal data-delay="0.1">
+        <h2 class="h">Dzielnice, w których pracujemy</h2>
+        <ul class="chips">{m.data.districts.map((d) => <li>{d}</li>)}</ul>
+        <h2 class="h">Orientacyjne ceny {m.data.locative}</h2>
+        <table>
+          <tbody>
+            {
+              standards.map((s) => (
+                <tr>
+                  <th scope="row">{s.name}</th>
+                  <td>
+                    {fmt.format(s.min)}–{fmt.format(s.max)} zł/m²
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+        <p class="small muted">Stawki przykładowe, brutto. <a href="/#kalkulator">Policz dokładniej w kalkulatorze →</a></p>
+      </aside>
+    </div>
+  </section>
+
+  {
+    items.length > 0 && (
+      <section class="section real">
+        <div class="wrap">
+          <div class="section-head" data-reveal>
+            <span class="eyebrow">Realizacje {m.data.locative}</span>
+            <h2>Wnętrza, które oddaliśmy {m.data.locative}</h2>
+          </div>
+          <div class="grid">
+            {items.map((r) => (
+              <article data-reveal>
+                <BeforeAfter src={r.data.cover} alt={r.data.title} sizes="(min-width: 900px) 45vw, 92vw" />
+                <h3>
+                  <a href={`/realizacje/${r.id}`}>{r.data.title}</a>
+                </h3>
+                <p class="muted">
+                  {r.data.district} · {r.data.area} m² · {r.data.standard} · {r.data.weeks} tygodni
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <Kontakt />
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: clamp(40px, 6vw, 100px);
+    align-items: start;
+  }
+  .prose :global(p) {
+    font-size: 1.12rem;
+    margin-bottom: 1.2em;
+  }
+  .prose :global(p:first-child) {
+    font: 380 1.6rem/1.4 var(--serif);
+  }
+  .prose :global(em) {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .h {
+    font: 600 0.75rem/1 var(--sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 0 0 16px;
+  }
+  .chips {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips li {
+    font-size: 0.85rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 14px;
+  }
+  th,
+  td {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    font-weight: 400;
+  }
+  th {
+    font: 380 1.3rem/1 var(--serif);
+  }
+  td {
+    text-align: right;
+    font-weight: 600;
+  }
+  .small {
+    font-size: 0.85rem;
+  }
+  .small a {
+    color: var(--brass);
+  }
+  .real {
+    background: var(--stone-2);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+  .grid h3 {
+    margin: 18px 0 6px;
+  }
+  .grid h3 a {
+    text-decoration: none;
+  }
+  @media (max-width: 860px) {
+    .intro,
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

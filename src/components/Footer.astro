@@ -1,0 +1,116 @@
+---
+import { getCollection } from 'astro:content';
+import { site, cities } from '../data/site';
+
+const miasta = await getCollection('miasta');
+const realizacje = await getCollection('realizacje');
+const cityPages = cities.filter((c) => miasta.some((m) => m.id === c.slug));
+---
+
+<footer class="site-footer dark">
+  <div class="wrap grid">
+    <div class="brand">
+      <a href="/" class="logo">S<span>-</span>MAAL</a>
+      <p class="muted">{site.tagline}. Siedziba w {site.city}, realizacje w całym województwie śląskim.</p>
+    </div>
+    <div>
+      <h2 class="h">Kontakt</h2>
+      <address>
+        {site.name}<br />
+        {site.street}<br />
+        {site.postalCode} {site.city}<br />
+        <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a><br />
+        <a href={`mailto:${site.email}`}>{site.email}</a><br />
+        <span class="muted">{site.hours}</span>
+      </address>
+    </div>
+    <div>
+      <h2 class="h">Obszar działania</h2>
+      <ul>
+        {cityPages.map((c) => <li><a href={`/wykonczenia-wnetrz-${c.slug}`}>Wykończenia wnętrz {c.name}</a></li>)}
+        <li><a href="/#obszar">Cały Śląsk</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="h">Realizacje</h2>
+      <ul>
+        {realizacje.map((r) => <li><a href={`/realizacje/${r.id}`}>{r.data.title}</a></li>)}
+      </ul>
+    </div>
+  </div>
+  <div class="wrap bottom muted">
+    <span>© 2026 {site.name}. Koncept strony — treści przykładowe.</span>
+    <a href="/polityka-prywatnosci">Polityka prywatności</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: 90px 110px;
+    background: #0f0e0d;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 48px;
+  }
+  .logo {
+    font: 500 2rem/1 var(--serif);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+  .logo span {
+    color: var(--brass);
+  }
+  .brand p {
+    margin-top: 18px;
+    max-width: 320px;
+    font-size: 0.95rem;
+  }
+  .h {
+    font: 600 0.75rem/1 var(--sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 18px;
+  }
+  address {
+    font-style: normal;
+    font-size: 0.95rem;
+    line-height: 1.8;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    font-size: 0.95rem;
+  }
+  a {
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--brass-2);
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 70px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-dark);
+    font-size: 0.85rem;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

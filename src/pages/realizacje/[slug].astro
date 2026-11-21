@@ -1,0 +1,209 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import BeforeAfter from '../../components/BeforeAfter.astro';
+import MockImg from '../../components/MockImg.astro';
+import Kontakt from '../../components/Kontakt.astro';
+import { cities } from '../../data/site';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('realizacje')).sort((a, b) => a.data.order - b.data.order);
+  return all.map((r, i) => ({ params: { slug: r.id }, props: { r, next: all[(i + 1) % all.length] } }));
+}
+
+const { r, next } = Astro.props;
+const { Content } = await render(r);
+const d = r.data;
+const city = cities.find((c) => c.slug === d.city)!;
+const cityPage = (await getCollection('miasta')).find((m) => m.id === d.city);
+const facts = [
+  ['Lokalizacja', `${city.name}, ${d.district}`],
+  ['Metraż', `${d.area} m²`],
+  ['Standard', d.standard],
+  ['Czas realizacji', `${d.weeks} tygodni`],
+  ['Rok', String(d.year)],
+];
+---
+
+<Base
+  title={`${d.title} — realizacja ${city.name} | S-Maal`}
+  description={`${d.summary} Realizacja S-Maal: ${city.name}, ${d.area} m², standard ${d.standard}.`}
+  image={d.cover}
+  breadcrumbs={[
+    { name: 'Realizacje', path: '/#realizacje' },
+    { name: d.title, path: `/realizacje/${r.id}` },
+  ]}
+>
+  <PageHero
+    crumbs={[
+      { name: 'Realizacje', path: '/#realizacje' },
+      { name: d.title, path: `/realizacje/${r.id}` },
+    ]}
+    eyebrow={`Realizacja · ${city.name}`}
+    title={d.title}
+    lead={d.summary}
+    image={d.cover}
+    alt={d.title}
+  />
+
+  <section class="section">
+    <div class="wrap layout">
+      <dl class="facts" data-reveal>
+        {
+          facts.map(([k, v]) => (
+            <div>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="prose" data-reveal>
+        <Content />
+        <h2 class="h">Zakres prac</h2>
+        <ul class="scope">{d.scope.map((s) => <li>{s}</li>)}</ul>
+        {
+          cityPage && (
+            <p>
+              <a href={`/wykonczenia-wnetrz-${d.city}`} class="link">
+                Więcej o wykończeniach wnętrz {cityPage.data.locative} →
+              </a>
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section ba-sec dark">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Przed i po</span>
+        <h2>Przeciągnij <em>suwak</em></h2>
+      </div>
+      <BeforeAfter src={d.cover} alt={d.title} sizes="(min-width: 1320px) 1320px, 100vw" />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Galeria</span>
+        <h2>Detale</h2>
+      </div>
+      <div class="gallery">
+        {d.gallery.map((img, i) => <MockImg src={img} alt={`${d.title} — zdjęcie ${i + 1}`} sizes="(min-width: 900px) 45vw, 92vw" />)}
+      </div>
+      <a href={`/realizacje/${next.id}`} class="next" data-reveal>
+        <span class="eyebrow">Następna realizacja</span>
+        <span class="next-t">{next.data.title} →</span>
+      </a>
+    </div>
+  </section>
+
+  <Kontakt />
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    gap: clamp(40px, 6vw, 100px);
+    align-items: start;
+  }
+  .facts {
+    margin: 0;
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .facts div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .facts dt {
+    color: var(--muted);
+  }
+  .facts dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+  }
+  .prose :global(p) {
+    font-size: 1.1rem;
+    margin-bottom: 1.2em;
+  }
+  .prose :global(p:first-child) {
+    font: 380 1.55rem/1.4 var(--serif);
+  }
+  .prose :global(em) {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .h {
+    font: 600 0.75rem/1 var(--sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 32px 0 16px;
+  }
+  .scope {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .scope li {
+    font-size: 0.85rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+  .link {
+    color: var(--brass);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .gallery :global(.mock) {
+    aspect-ratio: 4 / 3;
+  }
+  .gallery :global(.mock:first-child) {
+    grid-column: span 2;
+    aspect-ratio: 16 / 7;
+  }
+  .next {
+    display: grid;
+    gap: 14px;
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .next-t {
+    font: 380 clamp(2rem, 4vw, 3.4rem) / 1.05 var(--serif);
+    transition: color 0.3s;
+  }
+  .next:hover .next-t {
+    color: var(--brass);
+  }
+  @media (max-width: 860px) {
+    .layout,
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+    .gallery :global(.mock:first-child) {
+      grid-column: auto;
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

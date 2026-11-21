@@ -1,0 +1,286 @@
+---
+import { cities, site } from '../data/site';
+---
+
+<section id="kontakt" class="section dark kontakt">
+  <div class="wrap grid">
+    <div class="info" data-reveal>
+      <span class="eyebrow">Bezpłatna konsultacja</span>
+      <h2>Porozmawiajmy o Twoim <em>wnętrzu</em></h2>
+      <ol class="next">
+        <li><span>01</span>Oddzwaniamy w ciągu jednego dnia roboczego.</li>
+        <li><span>02</span>Przyjeżdżamy na rozmowę — bez opłat.</li>
+        <li><span>03</span>W 7 dni dostajesz kosztorys i harmonogram.</li>
+      </ol>
+      <address>
+        <a href={`tel:${site.phone.replace(/\s/g, '')}`} class="big">{site.phone}</a>
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+        <span class="muted">{site.street}, {site.postalCode} {site.city} · {site.hours}</span>
+      </address>
+    </div>
+
+    <div class="form-wrap" data-reveal data-delay="0.1">
+      <form class="form" aria-describedby="form-note">
+        <div class="hp" aria-hidden="true">
+          <label>Nie wypełniaj tego pola <input name="website" tabindex="-1" autocomplete="off" /></label>
+        </div>
+        <div class="row">
+          <label>Imię<input name="imie" required autocomplete="given-name" /></label>
+          <label>Telefon<input name="telefon" type="tel" required autocomplete="tel" pattern="\+?[0-9 ]{9,}" /></label>
+        </div>
+        <div class="row">
+          <label><span>E-mail <small>(opcjonalnie)</small></span><input name="email" type="email" autocomplete="email" /></label>
+          <label>
+            Lokalizacja
+            <input name="lokalizacja" required list="miasta" placeholder="np. Katowice, Brynów" />
+          </label>
+        </div>
+        <datalist id="miasta">
+          {cities.map((c) => <option value={c.name} />)}
+        </datalist>
+        <div class="row three">
+          <label>Metraż (m²)<input name="metraz" type="number" min="10" max="2000" inputmode="numeric" /></label>
+          <label>
+            Stan lokalu
+            <select name="stan">
+              <option>Stan deweloperski</option>
+              <option>Mieszkanie do remontu</option>
+              <option>Dom w budowie</option>
+              <option>Inny</option>
+            </select>
+          </label>
+          <label>
+            Planowany start
+            <select name="termin">
+              <option>Jak najszybciej</option>
+              <option>Do 3 miesięcy</option>
+              <option>3–6 miesięcy</option>
+              <option>Powyżej 6 miesięcy</option>
+            </select>
+          </label>
+        </div>
+        <label>
+          <span>Wiadomość <span class="from-calc" hidden>· ✓ dołączono wycenę z kalkulatora</span></span>
+          <textarea name="wiadomosc" rows="4" placeholder="Opowiedz krótko o swoim wnętrzu…"></textarea>
+        </label>
+        <label class="consent">
+          <input type="checkbox" name="zgoda" required />
+          <span>
+            Wyrażam zgodę na przetwarzanie moich danych osobowych przez {site.name} w celu kontaktu w sprawie konsultacji.
+            Szczegóły w <a href="/polityka-prywatnosci">polityce prywatności</a>.
+          </span>
+        </label>
+        <button class="btn" type="submit">Umów bezpłatną konsultację</button>
+        <p id="form-note" class="note">Koncept — formularz nie wysyła danych.</p>
+      </form>
+
+      <div class="done" role="status" hidden>
+        <span class="check" aria-hidden="true"></span>
+        <h3>Dziękujemy<span class="who"></span>!</h3>
+        <p class="muted">Oddzwonimy w ciągu jednego dnia roboczego, żeby umówić termin konsultacji.</p>
+        <p class="note">To koncept strony — żadne dane nie zostały wysłane.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById('kontakt')!;
+  const form = root.querySelector('form')!;
+  const done = root.querySelector<HTMLElement>('.done')!;
+
+  window.addEventListener('smaal:estimate', (e) => {
+    const { area, type, text } = (e as CustomEvent).detail;
+    (form.elements.namedItem('metraz') as HTMLInputElement).value = String(area);
+    (form.elements.namedItem('wiadomosc') as HTMLTextAreaElement).value = text;
+    if (type === 'dom') (form.elements.namedItem('stan') as HTMLSelectElement).value = 'Dom w budowie';
+    root.querySelector<HTMLElement>('.from-calc')!.hidden = false;
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if ((form.elements.namedItem('website') as HTMLInputElement).value) return; // bot
+    const name = (form.elements.namedItem('imie') as HTMLInputElement).value.trim();
+    root.querySelector('.who')!.textContent = name ? `, ${name}` : '';
+    form.hidden = true;
+    done.hidden = false;
+  });
+</script>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+  }
+  .info {
+    display: grid;
+    gap: 28px;
+  }
+  .next {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .next li {
+    display: flex;
+    gap: 16px;
+    color: #d6cfc3;
+  }
+  .next span {
+    color: var(--brass);
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    padding-top: 3px;
+  }
+  address {
+    display: grid;
+    gap: 8px;
+    font-style: normal;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-dark);
+  }
+  address a {
+    text-decoration: none;
+  }
+  .big {
+    font: 380 2rem/1.1 var(--serif);
+  }
+  .form-wrap {
+    padding: clamp(24px, 3.5vw, 44px);
+    border-radius: 24px;
+    background: var(--ink-2);
+    border: 1px solid var(--line-dark);
+  }
+  .form {
+    display: grid;
+    gap: 18px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .row.three {
+    grid-template-columns: 0.8fr 1.1fr 1.1fr;
+  }
+  label {
+    display: grid;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--muted-dark);
+  }
+  small {
+    font-size: 0.75rem;
+  }
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--line-dark);
+    background: var(--ink);
+    color: var(--stone);
+    font: 400 1rem/1.3 var(--sans);
+    transition: border-color 0.3s;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--brass);
+  }
+  input:user-invalid {
+    border-color: #c9553b;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .from-calc {
+    color: var(--brass-2);
+    font-weight: 600;
+  }
+  .consent {
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  .consent input {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    padding: 0;
+    accent-color: var(--brass);
+    margin-top: 2px;
+  }
+  .consent a {
+    color: var(--brass-2);
+  }
+  .form .btn {
+    justify-self: start;
+  }
+  .note {
+    font-size: 0.75rem;
+    color: var(--muted-dark);
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .done {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    padding: 40px 0;
+    animation: rise 0.8s var(--ease);
+  }
+  .form[hidden],
+  .done[hidden] {
+    display: none;
+  }
+  .check {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--brass);
+    position: relative;
+  }
+  .check::after {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 15px;
+    width: 14px;
+    height: 26px;
+    border: solid var(--ink);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .row,
+    .row.three {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

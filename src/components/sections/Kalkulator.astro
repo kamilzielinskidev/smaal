@@ -1,0 +1,354 @@
+---
+import Calculator from '../Calculator';
+---
+
+<section id="kalkulator" class="section dark kalkulator">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Kalkulator</span>
+      <h2>Ile kosztuje Twoje <em>pod klucz</em>?</h2>
+      <p class="muted">
+        Wybierz metraż, standard i dodatki — w kilka sekund zobaczysz orientacyjne widełki. Wynik przeniesiemy do formularza
+        konsultacji.
+      </p>
+    </div>
+    <Calculator client:visible />
+  </div>
+</section>
+
+<style is:global>
+  .calc {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+  }
+  .calc-controls {
+    display: grid;
+    gap: 44px;
+  }
+  .calc-group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  .calc-group legend,
+  .calc .legend {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    margin-bottom: 16px;
+    font: 600 0.75rem/1 var(--sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-dark);
+  }
+  .calc .legend output {
+    font: 380 2rem/1 var(--serif);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--stone);
+  }
+  .calc input[type='radio'],
+  .calc input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .seg-toggle {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--line-dark);
+  }
+  .seg-toggle label {
+    position: relative;
+    padding: 12px 26px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      background 0.3s,
+      color 0.3s;
+  }
+  .seg-toggle label.on {
+    background: var(--stone);
+    color: var(--ink);
+  }
+  .seg-toggle label:has(input:focus-visible),
+  .std-card:has(input:focus-visible),
+  .addon:has(input:focus-visible) {
+    outline: 2px solid var(--brass);
+    outline-offset: 3px;
+  }
+
+  .range {
+    --fill: 30%;
+    width: 100%;
+    appearance: none;
+    height: 2px;
+    background: linear-gradient(90deg, var(--brass) var(--fill), var(--line-dark) var(--fill));
+    outline-offset: 10px;
+    cursor: pointer;
+  }
+  .range::-webkit-slider-thumb {
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--stone);
+    border: 6px solid var(--brass);
+    box-shadow: 0 0 0 8px rgba(176, 141, 87, 0.15);
+  }
+  .range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--stone);
+    border: 6px solid var(--brass);
+  }
+  .range-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--muted-dark);
+  }
+
+  .std-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .std-card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 0 0 20px;
+    border: 1px solid var(--line-dark);
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--ink-2);
+    transition:
+      border-color 0.4s,
+      transform 0.5s var(--ease),
+      box-shadow 0.4s;
+  }
+  .std-card:hover {
+    transform: translateY(-4px);
+  }
+  .std-card.on {
+    border-color: var(--brass);
+    box-shadow:
+      0 0 0 1px var(--brass),
+      0 24px 60px -20px rgba(176, 141, 87, 0.45);
+  }
+  .std-visual {
+    position: relative;
+    display: block;
+    height: 170px;
+    margin-bottom: 10px;
+    background: radial-gradient(circle at 50% 60%, #2b2925, var(--ink-2) 70%);
+  }
+  .std-visual .sample-canvas {
+    position: absolute;
+    inset: 0;
+  }
+  .no-3d .swatch-komfort {
+    background: linear-gradient(135deg, #d7b384 0 45%, #f2efe9 45% 70%, #b3aea6 70%);
+  }
+  .no-3d .swatch-premium {
+    background: linear-gradient(135deg, #eeeae4 0 45%, #6b5039 45% 70%, #b08d57 70%);
+  }
+  .no-3d .swatch-signature {
+    background: linear-gradient(135deg, #1c1b1a 0 45%, #e2d3b8 45% 70%, #b08d57 70%);
+  }
+  .std-name,
+  .std-price,
+  .std-mat {
+    padding-inline: 20px;
+  }
+  .std-name {
+    font: 380 1.6rem/1.1 var(--serif);
+  }
+  .std-price {
+    font-weight: 600;
+    color: var(--brass-2);
+    font-size: 0.92rem;
+  }
+  .std-mat {
+    font-size: 0.82rem;
+    color: var(--muted-dark);
+  }
+
+  .addon-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .addon {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px 1fr 26px;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    padding: 16px 18px;
+    border: 1px solid var(--line-dark);
+    border-radius: 14px;
+    cursor: pointer;
+    transition:
+      border-color 0.3s,
+      background 0.3s;
+  }
+  .addon:hover {
+    border-color: rgba(176, 141, 87, 0.6);
+  }
+  .addon.on {
+    border-color: var(--brass);
+    background: rgba(176, 141, 87, 0.1);
+  }
+  .addon svg {
+    grid-row: span 2;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--ink-3);
+    fill: none;
+    stroke: var(--brass-2);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .addon-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .addon-price {
+    font-size: 0.8rem;
+    color: var(--muted-dark);
+  }
+  .addon-check {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--line-dark);
+    position: relative;
+    transition:
+      background 0.3s,
+      border-color 0.3s;
+  }
+  .addon-check::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    width: 6px;
+    height: 11px;
+    border: solid var(--ink);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.35s var(--ease);
+  }
+  .addon.on .addon-check {
+    background: var(--brass);
+    border-color: var(--brass);
+  }
+  .addon.on .addon-check::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .calc-summary {
+    position: sticky;
+    top: 100px;
+    display: grid;
+    gap: 14px;
+    padding: 32px;
+    border-radius: 22px;
+    background: linear-gradient(160deg, #262420, #1b1a17);
+    border: 1px solid rgba(176, 141, 87, 0.35);
+    container-type: inline-size;
+  }
+  .calc-total {
+    font: 360 min(3.4rem, 14cqi) / 1 var(--serif);
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .calc-total small {
+    font-size: 0.4em;
+    letter-spacing: 0;
+    color: var(--muted-dark);
+  }
+  .calc-sub {
+    font-size: 0.85rem;
+    color: var(--muted-dark);
+  }
+  .calc-break {
+    display: grid;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 18px 0;
+    border-block: 1px solid var(--line-dark);
+  }
+  .calc-break div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.9rem;
+  }
+  .calc-break dt {
+    color: var(--muted-dark);
+  }
+  .calc-break dd {
+    margin: 0;
+    text-align: right;
+  }
+  .calc-cta {
+    justify-content: center;
+  }
+  .calc-note {
+    font-size: 0.78rem;
+    color: var(--muted-dark);
+  }
+
+  @media (max-width: 1100px) {
+    .calc {
+      grid-template-columns: 1fr;
+    }
+    .calc-summary {
+      position: relative;
+      top: 0;
+    }
+  }
+  @media (max-width: 700px) {
+    .std-grid {
+      grid-template-columns: 1fr;
+    }
+    .std-card {
+      grid-template-columns: 120px 1fr;
+      padding: 0;
+      align-items: center;
+    }
+    .std-visual {
+      grid-row: span 3;
+      height: 120px;
+      margin: 0;
+    }
+    .std-name,
+    .std-price,
+    .std-mat {
+      padding-inline: 0 16px;
+    }
+    .addon-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
