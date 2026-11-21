@@ -15,6 +15,8 @@ const realizacje = defineCollection({
       year: z.number(),
       summary: z.string(),
       scope: z.array(z.string()),
+      tolerance: z.number(), // mm na łacie 2 m przy odbiorze
+      protection: z.string(), // co zabezpieczaliśmy na czas prac
       cover: image(),
       gallery: z.array(image()),
       order: z.number(),

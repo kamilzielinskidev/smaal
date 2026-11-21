@@ -6,7 +6,7 @@ import { GatedCanvas, RoomEnv, easeInOut, easeOut, easeOutBack, no3d, stagger, u
 import { concrete, marble, wood } from './textures';
 import { heroPhases, seg } from '../lib/stages';
 
-type Phases = { plaster: number; floor: number; tiles: number; furniture: number; light: number };
+type Phases = { plaster: number; floor: number; foil: number; tiles: number; furniture: number; light: number };
 type PhaseRef = RefObject<Phases>;
 type V3 = [number, number, number];
 
@@ -125,6 +125,7 @@ function Planks({ ph }: { ph: PhaseRef }) {
   }, []);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ map: wood('oak'), roughness: 0.6 }), []);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const last = useRef(-1);
 
   useLayoutEffect(() => {
     const r = Math.random;
@@ -134,6 +135,8 @@ function Planks({ ph }: { ph: PhaseRef }) {
 
   useFrame(() => {
     const t = ph.current!.floor;
+    if (t === last.current) return; // faza stoi (0 albo 1 przez większość scrolla) — macierze bez zmian
+    last.current = t;
     list.forEach((pl, i) => {
       const k = easeOut(stagger(t, i, list.length, 0.25));
       const len = (pl.z1 - pl.z0) * Math.max(k, 0.0001);
@@ -179,9 +182,12 @@ function Tiles({ ph }: { ph: PhaseRef }) {
   }, []);
   const mat = useMemo(() => new THREE.MeshStandardMaterial({ map: marble('carrara'), roughness: 0.22 }), []);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  const last = useRef(-1);
 
   useFrame(() => {
     const t = ph.current!.tiles;
+    if (t === last.current) return;
+    last.current = t;
     list.forEach((tile, i) => {
       const k = easeOutBack(stagger(t, i, list.length, 0.2));
       dummy.position.set(...tile.p);
@@ -196,6 +202,89 @@ function Tiles({ ph }: { ph: PhaseRef }) {
     <instancedMesh ref={ref} args={[undefined, undefined, list.length]} material={mat} receiveShadow castShadow>
       <boxGeometry args={[1, 1, 1]} />
     </instancedMesh>
+  );
+}
+
+const laserMat = new THREE.MeshBasicMaterial({ color: '#3dff7a', toneMapped: false, transparent: true, opacity: 0 });
+
+// Laser krzyżowy na etapie tynków: pozioma linia na wysokich ścianach i pionowa, która jedzie wzdłuż ściany.
+function Laser({ ph }: { ph: PhaseRef }) {
+  const group = useRef<THREE.Group>(null!);
+  const sweep = useRef<THREE.Mesh>(null!);
+  useFrame(() => {
+    const t = ph.current!.plaster;
+    const k = Math.min(seg(t, 0, 0.12), 1 - seg(t, 0.88, 1));
+    group.current.visible = k > 0.001;
+    laserMat.opacity = k;
+    sweep.current.position.x = THREE.MathUtils.lerp(-4.8, 4.8, easeInOut(t));
+  });
+  return (
+    <group ref={group} visible={false}>
+      <mesh position={[0, 1.1, -3.885]} material={laserMat}>
+        <boxGeometry args={[9.8, 0.03, 0.01]} />
+      </mesh>
+      <mesh position={[-4.885, 1.1, 0]} material={laserMat}>
+        <boxGeometry args={[0.01, 0.03, 7.8]} />
+      </mesh>
+      <mesh ref={sweep} position={[0, H / 2, -3.885]} material={laserMat}>
+        <boxGeometry args={[0.03, H, 0.01]} />
+      </mesh>
+      {/* niwelator na statywie */}
+      <group position={[1.6, 0, 0.6]}>
+        <Cyl p={[0, 0.52, 0]} r={0.015} h={1.04} m={mats.dark} />
+        <Box p={[0, 1.1, 0]} s={[0.16, 0.14, 0.16]} m={mats.cabinet} r={0.02} />
+        <mesh position={[0, 1.1, -0.085]} material={laserMat}>
+          <boxGeometry args={[0.06, 0.04, 0.01]} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+const foilMat = new THREE.MeshStandardMaterial({ color: '#b9cad3', roughness: 0.2, transparent: true, opacity: 0, depthWrite: false });
+const foilRollMat = new THREE.MeshStandardMaterial({ color: '#c9d6dd', roughness: 0.35 });
+// [x0, z0, x1, z1] — te same pola co deski (łazienka z płytkami zostaje odkryta)
+const FOIL: [number, number, number, number][] = [
+  [-4.9, -3.9, -1.1, -0.1],
+  [-1.9, 0.1, -1.1, 3.9],
+  [-0.9, -3.9, 4.9, 3.9],
+];
+
+// Folia ochronna na gotowej podłodze — pojawia się po deskach, przed meblami zwija się w rulon w stronę ściany.
+function Foil({ ph }: { ph: PhaseRef }) {
+  const areas = useRef<THREE.Group[]>([]);
+  useFrame(() => {
+    const t = ph.current!.foil;
+    const on = seg(t, 0, 0.15);
+    const roll = easeInOut(seg(t, 0.7, 1));
+    foilMat.opacity = 0.75 * on;
+    areas.current.forEach((g, i) => {
+      const [sheet, rulon] = g.children;
+      const w = FOIL[i][2] - FOIL[i][0];
+      g.visible = on > 0.001 && roll < 0.999;
+      sheet.scale.x = Math.max(1 - roll, 0.0001);
+      rulon.visible = roll > 0.001;
+      // rulon grubieje w miarę zwijania (skalujemy tylko promień — oś walca leży wzdłuż z)
+      const s = 0.4 + roll;
+      rulon.position.set(w * (1 - roll), 0.06 * s, 0);
+      rulon.scale.set(s, 1, s);
+    });
+  });
+  return (
+    <>
+      {FOIL.map(([x0, z0, x1, z1], i) => (
+        <group key={i} ref={(g) => void (areas.current[i] = g!)} position={[x0, 0.045, (z0 + z1) / 2]} visible={false}>
+          <group>
+            <mesh position={[(x1 - x0) / 2, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} material={foilMat} receiveShadow>
+              <planeGeometry args={[x1 - x0, z1 - z0]} />
+            </mesh>
+          </group>
+          <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.06, 0]} material={foilRollMat} castShadow>
+            <cylinderGeometry args={[0.06, 0.06, z1 - z0, 16]} />
+          </mesh>
+        </group>
+      ))}
+    </>
   );
 }
 
@@ -339,6 +428,7 @@ function Lights({ ph }: { ph: PhaseRef }) {
   const dusk = useMemo(() => new THREE.Color('#ffae73'), []);
   const day = useMemo(() => new THREE.Color('#bcd6e6'), []);
   const night = useMemo(() => new THREE.Color('#24304a'), []);
+  const shadow = matchMedia('(pointer: coarse)').matches ? 1024 : 2048;
 
   useFrame(() => {
     const l = easeInOut(ph.current!.light);
@@ -360,7 +450,7 @@ function Lights({ ph }: { ph: PhaseRef }) {
         position={[6, 11, 5]}
         intensity={2.6}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[shadow, shadow]}
         shadow-camera-left={-8}
         shadow-camera-right={8}
         shadow-camera-top={8}
@@ -410,9 +500,15 @@ function Rig({ prog }: { prog: RefObject<number> }) {
 
 function Scene() {
   const prog = useScrollProgress('#hero', 3.5);
-  const ph = useRef<Phases>({ plaster: 0, floor: 0, tiles: 0, furniture: 0, light: 0 });
+  const ph = useRef<Phases>({ plaster: 0, floor: 0, foil: 0, tiles: 0, furniture: 0, light: 0 });
+  const shown = useRef(false);
 
   useFrame(() => {
+    // pierwsza klatka narysowana — loader w Base.astro może zniknąć
+    if (!shown.current) {
+      shown.current = true;
+      requestAnimationFrame(() => window.dispatchEvent(new Event('smaal:hero-ready')));
+    }
     const p = prog.current;
     for (const key of Object.keys(heroPhases) as (keyof Phases)[]) {
       ph.current[key] = seg(p, heroPhases[key][0], heroPhases[key][1]);
@@ -428,6 +524,8 @@ function Scene() {
       <Shell ph={ph} />
       <Planks ph={ph} />
       <Tiles ph={ph} />
+      <Laser ph={ph} />
+      <Foil ph={ph} />
       <Furniture ph={ph} />
     </>
   );

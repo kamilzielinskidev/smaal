@@ -8,6 +8,8 @@ weeks: 8
 year: 2026
 summary: Mieszkanie z rynku wtórnego po generalnym remoncie — nowe instalacje, jasny dąb i ciepła biel.
 scope: [Demontaże i wywóz, Nowa instalacja elektryczna, Tynki i gładzie, Panele dębowe, Remont łazienki, Malowanie]
+tolerance: 2
+protection: Klatka, winda i drzwi sąsiadów
 cover: ../../assets/img/salon-2.jpg
 gallery: [../../assets/img/lazienka-3.jpg, ../../assets/img/jadalnia.jpg]
 order: 4

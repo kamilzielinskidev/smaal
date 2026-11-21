@@ -40,9 +40,10 @@ export function RoomEnv({ intensity = 0.5 }: { intensity?: number }) {
 }
 
 // Canvas renderuje klatki tylko gdy jest (prawie) na ekranie.
+// Start od true: pierwsza klatka zawsze się narysuje (loader na nią czeka), potem decyduje observer.
 export function GatedCanvas({ className, children, ...props }: CanvasProps & { className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   useEffect(() => {
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '150px' });
     io.observe(ref.current!);
@@ -50,7 +51,8 @@ export function GatedCanvas({ className, children, ...props }: CanvasProps & { c
   }, []);
   return (
     <div ref={ref} className={className}>
-      <Canvas frameloop={visible ? 'always' : 'never'} dpr={[1, 2]} {...props}>
+      {/* telefon: dpr max 1.5 — przy 3× różnica niewidoczna, koszt GPU duży */}
+      <Canvas frameloop={visible ? 'always' : 'never'} dpr={[1, matchMedia('(pointer: coarse)').matches ? 1.5 : 2]} {...props}>
         {children}
       </Canvas>
     </div>

@@ -7,22 +7,61 @@ interface Props {
   sizes?: string;
 }
 const { src, alt, sizes } = Astro.props;
+// widoczne etykiety „Przed” / „Po” podpięte do suwaka (label for)
+const id = `ba-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
 <div class="ba" style="--pos: 50%">
   <MockImg src={src} alt={`${alt} — po wykończeniu`} sizes={sizes} class="ba-after" />
   <MockImg src={src} alt={`${alt} — stan przed`} sizes={sizes} class="ba-before" before />
   <span class="ba-line" aria-hidden="true"><span></span></span>
-  <span class="ba-tag l">Przed</span>
-  <span class="ba-tag r">Po</span>
-  <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Porównaj stan przed i po" />
+  <label class="ba-tag l" for={id}>Przed</label>
+  <label class="ba-tag r" for={id}>Po</label>
+  <input class="ba-range" id={id} type="range" min="0" max="100" value="50" aria-label="Porównaj stan przed i po" />
 </div>
 
 <script>
+  // Klawiatura: natywny range. Mysz: przeciąganie po całym zdjęciu. Dotyk: tylko za uchwyt,
+  // żeby przesunięcie palcem po zdjęciu przewijało karuzelę i stronę.
+  const set = (ba: HTMLElement, v: number) => {
+    ba.querySelector<HTMLInputElement>('.ba-range')!.value = String(v);
+    ba.style.setProperty('--pos', v + '%');
+  };
+  let drag: { ba: HTMLElement; x: number; y: number; on: boolean } | null = null;
+  const move = (x: number) => {
+    const r = drag!.ba.getBoundingClientRect();
+    set(drag!.ba, Math.round(Math.min(100, Math.max(0, ((x - r.left) / r.width) * 100))));
+  };
+
   document.addEventListener('input', (e) => {
     const el = e.target as HTMLInputElement;
-    if (el.classList?.contains('ba-range')) el.parentElement!.style.setProperty('--pos', el.value + '%');
+    if (el.classList?.contains('ba-range')) set(el.parentElement!, Number(el.value));
   });
+  document.addEventListener('pointerdown', (e) => {
+    const t = e.target as Element;
+    const ba = t.closest<HTMLElement>('.ba');
+    drag =
+      ba && (e.pointerType === 'mouse' || t.closest('.ba-line'))
+        ? { ba, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' }
+        : null;
+    if (drag?.on) {
+      e.preventDefault();
+      move(e.clientX);
+    }
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    // dotyk: uchwyt rusza dopiero przy wyraźnie poziomym geście, pionowy zostaje przewijaniem strony
+    if (!drag.on) {
+      const dx = Math.abs(e.clientX - drag.x);
+      const dy = Math.abs(e.clientY - drag.y);
+      if (Math.max(dx, dy) < 6) return;
+      if (dy > dx) return void (drag = null);
+      drag.on = true;
+    }
+    move(e.clientX);
+  });
+  for (const t of ['pointerup', 'pointercancel']) document.addEventListener(t, () => (drag = null));
 </script>
 
 <style>
@@ -31,6 +70,8 @@ const { src, alt, sizes } = Astro.props;
     overflow: hidden;
     aspect-ratio: 3 / 2;
     background: var(--stone-2);
+    cursor: ew-resize;
+    user-select: none;
   }
   .ba :global(.mock) {
     position: absolute;
@@ -39,15 +80,16 @@ const { src, alt, sizes } = Astro.props;
   .ba :global(.ba-before) {
     clip-path: inset(0 calc(100% - var(--pos)) 0 0);
   }
+  /* pas 48px = cel dotyku uchwytu; widoczna linia 2px rysowana tłem */
   .ba-line {
     position: absolute;
     top: 0;
     bottom: 0;
     left: var(--pos);
-    width: 2px;
-    margin-left: -1px;
-    background: var(--stone);
-    pointer-events: none;
+    width: 48px;
+    margin-left: -24px;
+    background: linear-gradient(var(--stone), var(--stone)) center / 2px 100% no-repeat;
+    touch-action: pan-y;
     z-index: 3;
   }
   .ba-line span {
@@ -98,11 +140,8 @@ const { src, alt, sizes } = Astro.props;
     height: 100%;
     margin: 0;
     opacity: 0;
-    cursor: ew-resize;
+    pointer-events: none;
     z-index: 4;
-  }
-  .ba-range:focus-visible + * {
-    outline: none;
   }
   .ba:has(.ba-range:focus-visible) {
     outline: 2px solid var(--brass);

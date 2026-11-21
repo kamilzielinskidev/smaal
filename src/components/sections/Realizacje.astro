@@ -7,104 +7,64 @@ const items = (await getCollection('realizacje')).sort((a, b) => a.data.order - 
 const cityName = (slug: string) => cities.find((c) => c.slug === slug)?.name ?? slug;
 ---
 
-<section id="realizacje" class="realizacje">
-  <div class="pin">
-    <div class="wrap head">
-      <div>
-        <span class="eyebrow">Realizacje</span>
-        <h2>Przesuń, by zobaczyć <em>różnicę</em></h2>
-      </div>
-      <p class="muted">Każde wnętrze zaczynało się od surowego betonu. Przeciągnij suwak na zdjęciu, a potem zajrzyj do opisu realizacji.</p>
-    </div>
-    <div class="track">
-      {
-        items.map((r) => (
-          <article class="card">
-            <BeforeAfter src={r.data.cover} alt={r.data.title} sizes="(min-width: 900px) 56vw, 86vw" />
-            <div class="meta">
-              <div>
-                <h3>
-                  <a href={`/realizacje/${r.id}`}>{r.data.title}</a>
-                </h3>
-                <p class="muted">
-                  {cityName(r.data.city)}, {r.data.district} · {r.data.area} m² · {r.data.standard}
-                </p>
-              </div>
-              <a href={`/realizacje/${r.id}`} class="more" aria-label={`Zobacz realizację: ${r.data.title}`}>
-                Zobacz →
-              </a>
+<section id="realizacje" class="realizacje g2" style="--h: 2">
+  <div class="wrap">
+    {
+      [items.slice(0, 2), items.slice(2)].map((row, i) => (
+        <div class="group">
+          {i === 0 && (
+            <div class="head">
+              <h2>
+                Realizacje <em>przed</em> i po
+              </h2>
+              <p class="muted">Każde wnętrze zaczynało się od surowego betonu. Przeciągnij suwak na zdjęciu, a potem zajrzyj do opisu realizacji.</p>
             </div>
-          </article>
-        ))
-      }
-      <article class="card end">
-        <p class="end-t">Twoje mieszkanie może być następne.</p>
-        <a href="#kontakt" class="btn">Umów konsultację</a>
-      </article>
-    </div>
+          )}
+          <div class="cards">
+            {row.map((r) => (
+              <article class="card">
+                <BeforeAfter src={r.data.cover} alt={r.data.title} sizes="(min-width: 640px) 46vw, 92vw" />
+                <div class="meta">
+                  <div>
+                    <h3>
+                      <a href={`/realizacje/${r.id}`}>{r.data.title}</a>
+                    </h3>
+                    <p class="muted">
+                      {cityName(r.data.city)}, {r.data.district} · {r.data.area} m² · {r.data.standard}
+                    </p>
+                  </div>
+                  <a href={`/realizacje/${r.id}`} class="more" aria-label={`Zobacz realizację: ${r.data.title}`}>
+                    Zobacz →
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ))
+    }
   </div>
 </section>
-
-<script>
-  import { gsap } from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-  gsap.registerPlugin(ScrollTrigger);
-
-  const section = document.getElementById('realizacje')!;
-  const track = section.querySelector<HTMLElement>('.track')!;
-  gsap.matchMedia().add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
-    const dist = () => track.scrollWidth - window.innerWidth;
-    gsap.to(track, {
-      x: () => -dist(),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: section.querySelector('.pin'),
-        start: 'top top',
-        end: () => '+=' + dist(),
-        pin: true,
-        scrub: 0.8,
-        invalidateOnRefresh: true,
-      },
-    });
-  });
-</script>
 
 <style>
   .realizacje {
     background: var(--stone);
   }
-  .pin {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: clamp(28px, 4vh, 48px);
-    padding-block: 100px 32px;
-    overflow: hidden;
-  }
   .head {
     display: flex;
     justify-content: space-between;
     align-items: end;
-    gap: 40px;
+    gap: 20px 40px;
     flex-wrap: wrap;
-  }
-  .head h2 {
-    margin-top: 14px;
-    font-size: clamp(2.2rem, 4.2vw, 3.6rem);
+    margin-bottom: 48px;
   }
   .head p {
     max-width: 420px;
   }
-  .track {
-    display: flex;
-    gap: clamp(20px, 3vw, 48px);
-    padding-inline: var(--gutter);
-    width: max-content;
-  }
-  .card {
-    width: min(56vw, calc((100vh - 380px) * 1.5));
-    flex: none;
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
   }
   .meta {
     display: flex;
@@ -120,43 +80,20 @@ const cityName = (slug: string) => cities.find((c) => c.slug === slug)?.name ?? 
     font-size: 0.9rem;
     margin-top: 6px;
   }
+  /* cel dotyku 44px */
   .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     white-space: nowrap;
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
-    color: var(--brass);
+    color: var(--accent);
   }
-  .end {
-    width: min(30vw, 420px);
-    display: grid;
-    align-content: center;
-    justify-items: start;
-    gap: 24px;
-    padding: 40px;
-    background: var(--ink);
-    color: var(--stone);
-    aspect-ratio: auto;
-  }
-  .end-t {
-    font: 380 2.2rem/1.1 var(--serif);
-  }
-
-  @media (max-width: 899px), (prefers-reduced-motion: reduce) {
-    .track {
-      width: auto;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-padding-inline: var(--gutter);
-      padding-bottom: 12px;
-      scrollbar-width: thin;
-    }
-    .card {
-      width: min(86vw, 640px);
-      scroll-snap-align: start;
-    }
-    .end {
-      width: min(70vw, 360px);
+  @media (max-width: 639px) {
+    .cards {
+      grid-template-columns: 1fr;
     }
   }
 </style>

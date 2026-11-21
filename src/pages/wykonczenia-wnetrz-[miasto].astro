@@ -45,8 +45,8 @@ const path = `/wykonczenia-wnetrz-${m.id}`;
 
   <section class="section">
     <div class="wrap intro">
-      <div class="prose" data-reveal><Content /></div>
-      <aside data-reveal data-delay="0.1">
+      <div class="prose"><Content /></div>
+      <aside>
         <h2 class="h">Dzielnice, w których pracujemy</h2>
         <ul class="chips">{m.data.districts.map((d) => <li>{d}</li>)}</ul>
         <h2 class="h">Orientacyjne ceny {m.data.locative}</h2>
@@ -73,13 +73,13 @@ const path = `/wykonczenia-wnetrz-${m.id}`;
     items.length > 0 && (
       <section class="section real">
         <div class="wrap">
-          <div class="section-head" data-reveal>
+          <div class="section-head">
             <span class="eyebrow">Realizacje {m.data.locative}</span>
             <h2>Wnętrza, które oddaliśmy {m.data.locative}</h2>
           </div>
           <div class="grid">
             {items.map((r) => (
-              <article data-reveal>
+              <article>
                 <BeforeAfter src={r.data.cover} alt={r.data.title} sizes="(min-width: 900px) 45vw, 92vw" />
                 <h3>
                   <a href={`/realizacje/${r.id}`}>{r.data.title}</a>
@@ -120,7 +120,7 @@ const path = `/wykonczenia-wnetrz-${m.id}`;
     font: 600 0.75rem/1 var(--sans);
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--brass);
+    color: var(--accent);
     margin: 0 0 16px;
   }
   .chips {
@@ -160,7 +160,7 @@ const path = `/wykonczenia-wnetrz-${m.id}`;
     font-size: 0.85rem;
   }
   .small a {
-    color: var(--brass);
+    color: var(--accent);
   }
   .real {
     background: var(--stone-2);

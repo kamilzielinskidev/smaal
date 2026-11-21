@@ -39,6 +39,13 @@ export default function Calculator() {
   const { min, max } = estimate({ type, area, standard, addons: picked });
   const tMin = useTween(min);
   const tMax = useTween(max);
+  const range = `${thousands(min)}–${thousands(max)} tys. zł`;
+  // czytnik ekranu dostaje tylko końcową wartość, nie każdą klatkę animacji liczby
+  const [spoken, setSpoken] = useState(range);
+  useEffect(() => {
+    const t = setTimeout(() => setSpoken(range), 700);
+    return () => clearTimeout(t);
+  }, [range]);
   const std = standards.find((s) => s.id === standard)!;
 
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
@@ -57,9 +64,7 @@ export default function Calculator() {
         },
       }),
     );
-    const target = document.getElementById('kontakt');
-    const lenis = (window as any).lenis;
-    if (target) lenis ? lenis.scrollTo(target, { duration: 1.6 }) : target.scrollIntoView({ behavior: 'smooth' });
+    // przewinięcie do formularza i fokus robi Kontakt.astro po odebraniu zdarzenia
   };
 
   const fill = ((area - AREA.min) / (AREA.max - AREA.min)) * 100;
@@ -139,9 +144,20 @@ export default function Calculator() {
             ))}
           </div>
         </fieldset>
+
+        {/* telefon: podsumowanie jest pod kontrolkami, więc cena przykleja się do dołu ekranu */}
+        <a className="calc-peek" href="#calc-summary">
+          <span>Wstępna wycena</span>
+          <strong>
+            ok. {thousands(tMin)}–{thousands(tMax)} tys. zł
+          </strong>
+        </a>
       </div>
 
-      <aside className="calc-summary" aria-live="polite">
+      <aside id="calc-summary" className="calc-summary">
+        <p className="sr-only" aria-live="polite">
+          Wstępna wycena: ok. {spoken}
+        </p>
         <span className="eyebrow">Wstępna wycena</span>
         <p className="calc-total">
           <small>ok.</small> {thousands(tMin)}–{thousands(tMax)} <small>tys. zł</small>

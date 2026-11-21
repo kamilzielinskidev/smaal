@@ -8,6 +8,8 @@ weeks: 16
 year: 2026
 summary: Ostatnie piętro z widokiem na zieleń — orzech, trawertyn i dwie łazienki z wolnostojącymi wannami.
 scope: [Przebudowa ścian działowych, Sufity podwieszane z LED, Podłogi z orzecha amerykańskiego, Dwie łazienki w trawertynie, Malowanie, Biały montaż]
+tolerance: 1
+protection: Taras, podłogi, winda i hol
 cover: ../../assets/img/salon-3.jpg
 gallery: [../../assets/img/jadalnia.jpg, ../../assets/img/lazienka-2.jpg, ../../assets/img/kuchnia.jpg]
 order: 2

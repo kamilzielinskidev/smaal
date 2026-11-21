@@ -2,12 +2,11 @@
 import { faq } from '../../data/faq';
 ---
 
-<section id="faq" class="section faq">
+<section id="faq" class="section faq" style="--hm: 2">
   <div class="wrap grid">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">FAQ</span>
+    <div class="section-head">
       <h2>Najczęstsze <em>pytania</em></h2>
-      <p class="muted">Nie ma tu Twojego? Zapytaj na konsultacji — odpowiadamy konkretnie, z liczbami.</p>
+      <p class="muted">Nie ma tu Twojego? Zapytaj na konsultacji. Odpowiadamy konkretnie, z liczbami.</p>
     </div>
     <div class="list">
       {
@@ -28,12 +27,11 @@ import { faq } from '../../data/faq';
 <style>
   .faq {
     background: var(--stone);
-    border-top: 1px solid var(--line);
   }
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    gap: clamp(32px, 5vw, 80px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
     align-items: start;
   }
   details {
@@ -44,15 +42,12 @@ import { faq } from '../../data/faq';
     justify-content: space-between;
     align-items: center;
     gap: 24px;
-    padding: 26px 0;
+    padding: 14px 0;
     cursor: pointer;
     list-style: none;
   }
   summary::-webkit-details-marker {
     display: none;
-  }
-  summary h3 {
-    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
   }
   .plus {
     position: relative;
@@ -61,9 +56,7 @@ import { faq } from '../../data/faq';
     height: 36px;
     border-radius: 50%;
     border: 1px solid var(--line);
-    transition:
-      transform 0.5s var(--ease),
-      background 0.3s;
+    transition: background 0.3s;
   }
   .plus::before,
   .plus::after {
@@ -79,10 +72,13 @@ import { faq } from '../../data/faq';
   .plus::after {
     rotate: 90deg;
   }
+  /* otwarte: plus zamienia się w minus, bez obracania */
   details[open] .plus {
-    transform: rotate(45deg);
     background: var(--brass);
     border-color: var(--brass);
+  }
+  details[open] .plus::after {
+    opacity: 0;
   }
   details p {
     padding: 0 60px 28px 0;
@@ -91,6 +87,9 @@ import { faq } from '../../data/faq';
   @media (max-width: 860px) {
     .grid {
       grid-template-columns: 1fr;
+    }
+    .section-head {
+      margin-bottom: 0;
     }
     details p {
       padding-right: 0;

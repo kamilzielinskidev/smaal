@@ -8,6 +8,8 @@ weeks: 11
 year: 2025
 summary: Trzy pokoje ze stanu deweloperskiego — dąb wędzony, łazienka w spieku i jasna strefa dzienna.
 scope: [Tynki i gładzie, Podłogi z deski dębowej, Łazienka w spieku 120×120, Płytki w kuchni, Oświetlenie LED, Malowanie]
+tolerance: 1.5
+protection: Podłogi, drzwi, winda i klatka
 cover: ../../assets/img/salon.jpg
 gallery: [../../assets/img/kuchnia.jpg, ../../assets/img/lazienka.jpg, ../../assets/img/sypialnia.jpg]
 order: 1

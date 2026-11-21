@@ -1,15 +1,16 @@
 ---
+import MockImg from './MockImg.astro';
+import photo from '../assets/img/jadalnia.jpg';
 import { cities, site } from '../data/site';
 ---
 
-<section id="kontakt" class="section dark kontakt">
+<section id="kontakt" class="section dark kontakt" style="--hm: 2">
   <div class="wrap grid">
-    <div class="info" data-reveal>
-      <span class="eyebrow">Bezpłatna konsultacja</span>
+    <div class="info">
       <h2>Porozmawiajmy o Twoim <em>wnętrzu</em></h2>
       <ol class="next">
         <li><span>01</span>Oddzwaniamy w ciągu jednego dnia roboczego.</li>
-        <li><span>02</span>Przyjeżdżamy na rozmowę — bez opłat.</li>
+        <li><span>02</span>Przyjeżdżamy na bezpłatną rozmowę.</li>
         <li><span>03</span>W 7 dni dostajesz kosztorys i harmonogram.</li>
       </ol>
       <address>
@@ -17,16 +18,18 @@ import { cities, site } from '../data/site';
         <a href={`mailto:${site.email}`}>{site.email}</a>
         <span class="muted">{site.street}, {site.postalCode} {site.city} · {site.hours}</span>
       </address>
+      <MockImg src={photo} alt="Jadalnia z zielonymi krzesłami i okrągłym lustrem" sizes="(min-width: 861px) 46vw, 92vw" class="photo" />
     </div>
 
-    <div class="form-wrap" data-reveal data-delay="0.1">
+    <div class="form-wrap">
       <form class="form" aria-describedby="form-note">
+        <p class="from-calc" hidden>✓ Wycena z kalkulatora jest już w wiadomości. Uzupełnij dane kontaktowe.</p>
         <div class="hp" aria-hidden="true">
           <label>Nie wypełniaj tego pola <input name="website" tabindex="-1" autocomplete="off" /></label>
         </div>
         <div class="row">
           <label>Imię<input name="imie" required autocomplete="given-name" /></label>
-          <label>Telefon<input name="telefon" type="tel" required autocomplete="tel" pattern="\+?[0-9 ]{9,}" /></label>
+          <label>Telefon<input name="telefon" type="tel" required autocomplete="tel" pattern="\+?[0-9 \(\)\-]{9,}" title="Numer telefonu, np. 600 123 456" /></label>
         </div>
         <div class="row">
           <label><span>E-mail <small>(opcjonalnie)</small></span><input name="email" type="email" autocomplete="email" /></label>
@@ -60,7 +63,7 @@ import { cities, site } from '../data/site';
           </label>
         </div>
         <label>
-          <span>Wiadomość <span class="from-calc" hidden>· ✓ dołączono wycenę z kalkulatora</span></span>
+          Wiadomość
           <textarea name="wiadomosc" rows="4" placeholder="Opowiedz krótko o swoim wnętrzu…"></textarea>
         </label>
         <label class="consent">
@@ -71,20 +74,22 @@ import { cities, site } from '../data/site';
           </span>
         </label>
         <button class="btn" type="submit">Umów bezpłatną konsultację</button>
-        <p id="form-note" class="note">Koncept — formularz nie wysyła danych.</p>
+        <p id="form-note" class="note">Koncept: formularz nie wysyła danych.</p>
       </form>
 
       <div class="done" role="status" hidden>
         <span class="check" aria-hidden="true"></span>
         <h3>Dziękujemy<span class="who"></span>!</h3>
         <p class="muted">Oddzwonimy w ciągu jednego dnia roboczego, żeby umówić termin konsultacji.</p>
-        <p class="note">To koncept strony — żadne dane nie zostały wysłane.</p>
+        <p class="note">To koncept strony, żadne dane nie zostały wysłane.</p>
       </div>
     </div>
   </div>
 </section>
 
 <script>
+  import { goTo } from '../lib/scroll';
+
   const root = document.getElementById('kontakt')!;
   const form = root.querySelector('form')!;
   const done = root.querySelector<HTMLElement>('.done')!;
@@ -95,6 +100,10 @@ import { cities, site } from '../data/site';
     (form.elements.namedItem('wiadomosc') as HTMLTextAreaElement).value = text;
     if (type === 'dom') (form.elements.namedItem('stan') as HTMLSelectElement).value = 'Dom w budowie';
     root.querySelector<HTMLElement>('.from-calc')!.hidden = false;
+    // formularz mógł być już wysłany — nowa wycena otwiera go ponownie
+    form.hidden = false;
+    done.hidden = true;
+    goTo(root.querySelector<HTMLElement>('.form-wrap')!);
   });
 
   form.addEventListener('submit', (e) => {
@@ -104,19 +113,29 @@ import { cities, site } from '../data/site';
     root.querySelector('.who')!.textContent = name ? `, ${name}` : '';
     form.hidden = true;
     done.hidden = false;
+    // formularz znika, więc podziękowanie ląduje wyżej — przewijamy do niego i dajemy mu fokus
+    goTo(done);
   });
 </script>
 
 <style>
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    gap: clamp(40px, 6vw, 96px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
     align-items: start;
   }
+  /* zdjęcie zajmuje to, co zostaje pod adresem — kolumna równa wysokością formularzowi */
   .info {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 28px;
+    align-self: stretch;
+  }
+  .info :global(.photo) {
+    flex: 1 1 0;
+    min-height: 200px;
+    border-radius: 20px;
   }
   .next {
     list-style: none;
@@ -136,6 +155,7 @@ import { cities, site } from '../data/site';
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     padding-top: 3px;
+    font-variant-numeric: tabular-nums;
   }
   address {
     display: grid;
@@ -194,6 +214,7 @@ import { cities, site } from '../data/site';
   textarea:focus {
     outline: none;
     border-color: var(--brass);
+    box-shadow: 0 0 0 1px var(--brass);
   }
   input:user-invalid {
     border-color: #c9553b;
@@ -202,8 +223,17 @@ import { cities, site } from '../data/site';
     resize: vertical;
   }
   .from-calc {
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(176, 141, 87, 0.45);
+    background: rgba(176, 141, 87, 0.1);
     color: var(--brass-2);
+    font-size: 0.85rem;
     font-weight: 600;
+  }
+  .form-wrap,
+  .done {
+    scroll-margin-top: 96px;
   }
   .consent {
     display: flex;
@@ -275,6 +305,11 @@ import { cities, site } from '../data/site';
   @media (max-width: 900px) {
     .grid {
       grid-template-columns: 1fr;
+    }
+    .info :global(.photo) {
+      flex: none;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
     }
   }
   @media (max-width: 560px) {

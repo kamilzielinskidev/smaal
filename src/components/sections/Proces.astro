@@ -1,23 +1,29 @@
 ---
+import MockImg from '../MockImg.astro';
+import photo from '../../assets/img/sypialnia.jpg';
+
 const steps = [
   { t: 'Konsultacja', d: 'Spotykamy się na miejscu i rozmawiamy o stylu, budżecie i terminie. Konsultacja jest bezpłatna.' },
-  { t: 'Doradztwo', d: 'Pomagamy wybrać płytki, podłogi, drzwi i armaturę — tak, żeby pasowały do siebie i do budżetu.' },
-  { t: 'Kosztorys', d: 'Rozpisujemy kosztorys na pozycje, razem z materiałami. Cena z umowy nie zmienia się w trakcie prac.' },
-  { t: 'Realizacja', d: 'U Ciebie pracuje stała ekipa z kierownikiem. Co tydzień wysyłamy zdjęcia z postępu prac.' },
-  { t: 'Odbiór', d: 'Odbieramy prace razem z Tobą i sprzątamy — sprzątanie jest wliczone w cenę. Zostaje tylko wnieść meble.' },
+  { t: 'Doradztwo', d: 'Pomagamy wybrać płytki, podłogi, drzwi i armaturę, tak żeby pasowały do siebie i do budżetu.' },
+  { t: 'Kosztorys', d: 'Mierzymy mieszkanie laserem i rozpisujemy kosztorys na pozycje, razem z materiałami. Cena z umowy nie zmienia się w trakcie prac.' },
+  { t: 'Zabezpieczenie', d: 'Zanim wejdzie ekipa, zabezpieczamy podłogi, okna, drzwi i klatkę schodową. Z administracją ustalamy miejsce na odpady.' },
+  { t: 'Realizacja', d: 'U Ciebie pracuje stała ekipa z kierownikiem. Po każdym dniu pracy sprzątamy, a co tydzień wysyłamy zdjęcia z postępu.' },
+  { t: 'Odbiór', d: 'Odbieramy prace z poziomicą laserową, a każdy pomiar trafia do protokołu. Na koniec myjemy okna, fugi i podłogi.' },
 ];
 ---
 
-<section id="proces" class="proces dark">
-  <div class="wrap steps-wrap">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">Proces</span>
-      <h2>Jak <em>pracujemy</em></h2>
+<section id="proces" class="proces dark" style="--hm: 2">
+  <div class="wrap row">
+    <div class="intro">
+      <div class="section-head">
+        <h2>Proces: od konsultacji do <em>odbioru</em></h2>
+      </div>
+      <MockImg src={photo} alt="Wykończona sypialnia z ciemnymi ścianami i oświetleniem sufitowym" sizes="(min-width: 1001px) 46vw, 92vw" class="photo" />
     </div>
     <ol class="steps">
       {
         steps.map((s, i) => (
-          <li data-reveal data-delay={i * 0.08}>
+          <li>
             <span class="i">0{i + 1}</span>
             <h3>{s.t}</h3>
             <p class="muted">{s.d}</p>
@@ -34,15 +40,27 @@ const steps = [
     letter-spacing: 0.12em;
     color: var(--brass);
   }
-  .steps-wrap {
-    padding-block: clamp(80px, 10vw, 140px);
+  /* split na połowie: nagłówek i zdjęcie po lewej, kroki 2×3 po prawej */
+  .row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .intro {
+    display: flex;
+    flex-direction: column;
+  }
+  .intro :global(.photo) {
+    flex: 1 1 0;
+    min-height: 240px;
+    border-radius: 20px;
   }
   .steps {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
   }
   .steps li {
@@ -57,8 +75,13 @@ const steps = [
   }
 
   @media (max-width: 1000px) {
-    .steps {
-      grid-template-columns: 1fr 1fr;
+    .row {
+      grid-template-columns: 1fr;
+    }
+    .intro :global(.photo) {
+      flex: none;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
     }
   }
   @media (max-width: 560px) {

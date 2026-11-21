@@ -10,54 +10,65 @@ const services = [
     img: salon,
     title: 'Mieszkania pod klucz',
     text: 'Zajmujemy się mieszkaniami od stanu deweloperskiego aż po oddanie kluczy. Wszystkie prace prowadzimy w jednym harmonogramie.',
+    focus: 'Ściany w tolerancji 2 mm na 2 m',
     points: ['Tynki, gładzie, zabudowy GK', 'Podłogi i drzwi', 'Elektryka i hydraulika'],
   },
   {
     img: dom,
     title: 'Domy jednorodzinne',
-    text: 'Wykańczamy domy jednorodzinne — od tynków i gładzi po malowanie i biały montaż.',
+    text: 'Wykańczamy domy jednorodzinne: od tynków i gładzi po malowanie i biały montaż.',
+    focus: 'Codzienne sprzątanie i wywóz odpadów',
     points: ['Tynki, gładzie, malowanie', 'Podłogi i płytki', 'Biały montaż i drzwi'],
   },
   {
     img: lazienka,
     title: 'Łazienki',
     text: 'Robimy łazienki od surowych ścian: hydroizolacja, płytki, odpływy liniowe, stelaże podtynkowe i biały montaż.',
+    focus: 'Płytki od osi, fugi w linii',
     points: ['Hydroizolacja', 'Płytki wielkoformatowe', 'Biały montaż'],
   },
   {
     img: kuchnia,
     title: 'Kuchnie',
     text: 'Przygotowujemy kuchnię pod zabudowę: instalacje, ściany, podłogi i płytki nad blatem.',
+    focus: 'Cięcie płytek z odciągiem pyłu',
     points: ['Instalacje pod zabudowę', 'Płytki i spieki nad blatem', 'Podłogi i oświetlenie'],
   },
 ];
 ---
 
-<section id="uslugi" class="section">
+<section id="uslugi" class="section g2" style="--h: 2">
   <div class="wrap">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">Zakres usług</span>
-      <h2>Czym się <em>zajmujemy</em></h2>
-    </div>
-    <div class="grid">
-      {
-        services.map((s, i) => (
-          <article class="svc" data-reveal data-delay={(i % 2) * 0.12}>
-            <MockImg src={s.img} alt={s.title} sizes="(min-width: 900px) 45vw, 92vw" />
-            <div class="body">
-              <span class="num">0{i + 1}</span>
-              <h3>{s.title}</h3>
-              <p class="muted">{s.text}</p>
-              <ul>
-                {s.points.map((p) => (
-                  <li>{p}</li>
-                ))}
-              </ul>
+    {
+      [services.slice(0, 2), services.slice(2)].map((row, i) => (
+        <div class="group">
+          {i === 0 && (
+            <div class="section-head">
+              <h2>
+                Zakres <em>usług</em>
+              </h2>
             </div>
-          </article>
-        ))
-      }
-    </div>
+          )}
+          <div class="grid">
+            {row.map((s) => (
+              <article class="svc">
+                <MockImg src={s.img} alt={s.title} sizes="(min-width: 640px) 46vw, 92vw" />
+                <div class="body">
+                  <h3>{s.title}</h3>
+                  <p class="muted">{s.text}</p>
+                  <ul>
+                    <li class="focus">{s.focus}</li>
+                    {s.points.map((p) => (
+                      <li>{p}</li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ))
+    }
   </div>
 </section>
 
@@ -65,29 +76,21 @@ const services = [
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: clamp(32px, 4vw, 64px) clamp(24px, 3vw, 48px);
-  }
-  .svc:nth-child(even) {
-    margin-top: clamp(0px, 8vw, 120px);
+    gap: 24px;
   }
   .svc :global(.mock) {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
   }
   .svc :global(img) {
     transition: transform 1.2s var(--ease);
   }
   .svc:hover :global(img) {
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
   .body {
     display: grid;
     gap: 10px;
     padding-top: 22px;
-  }
-  .num {
-    font: 600 0.75rem/1 var(--sans);
-    letter-spacing: 0.18em;
-    color: var(--brass);
   }
   ul {
     list-style: none;
@@ -103,12 +106,15 @@ const services = [
     border: 1px solid var(--line);
     border-radius: 999px;
   }
-  @media (max-width: 760px) {
+  /* wyróżniony chip: dokładność / czystość */
+  li.focus {
+    border-color: var(--brass);
+    background: rgba(176, 141, 87, 0.12);
+    font-weight: 600;
+  }
+  @media (max-width: 639px) {
     .grid {
       grid-template-columns: 1fr;
-    }
-    .svc:nth-child(even) {
-      margin-top: 0;
     }
   }
 </style>

@@ -22,6 +22,8 @@ const facts = [
   ['Metraż', `${d.area} m²`],
   ['Standard', d.standard],
   ['Czas realizacji', `${d.weeks} tygodni`],
+  ['Odchyłka ścian przy odbiorze', `${String(d.tolerance).replace('.', ',')}\u00a0mm na\u00a02\u00a0m`],
+  ['Zabezpieczenie', d.protection],
   ['Rok', String(d.year)],
 ];
 ---
@@ -49,7 +51,7 @@ const facts = [
 
   <section class="section">
     <div class="wrap layout">
-      <dl class="facts" data-reveal>
+      <dl class="facts">
         {
           facts.map(([k, v]) => (
             <div>
@@ -59,7 +61,7 @@ const facts = [
           ))
         }
       </dl>
-      <div class="prose" data-reveal>
+      <div class="prose">
         <Content />
         <h2 class="h">Zakres prac</h2>
         <ul class="scope">{d.scope.map((s) => <li>{s}</li>)}</ul>
@@ -78,7 +80,7 @@ const facts = [
 
   <section class="section ba-sec dark">
     <div class="wrap">
-      <div class="section-head" data-reveal>
+      <div class="section-head">
         <span class="eyebrow">Przed i po</span>
         <h2>Przeciągnij <em>suwak</em></h2>
       </div>
@@ -88,14 +90,14 @@ const facts = [
 
   <section class="section">
     <div class="wrap">
-      <div class="section-head" data-reveal>
+      <div class="section-head">
         <span class="eyebrow">Galeria</span>
         <h2>Detale</h2>
       </div>
       <div class="gallery">
         {d.gallery.map((img, i) => <MockImg src={img} alt={`${d.title} — zdjęcie ${i + 1}`} sizes="(min-width: 900px) 45vw, 92vw" />)}
       </div>
-      <a href={`/realizacje/${next.id}`} class="next" data-reveal>
+      <a href={`/realizacje/${next.id}`} class="next">
         <span class="eyebrow">Następna realizacja</span>
         <span class="next-t">{next.data.title} →</span>
       </a>
@@ -147,7 +149,7 @@ const facts = [
     font: 600 0.75rem/1 var(--sans);
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--brass);
+    color: var(--accent);
     margin: 32px 0 16px;
   }
   .scope {
@@ -165,7 +167,7 @@ const facts = [
     border: 1px solid var(--line);
   }
   .link {
-    color: var(--brass);
+    color: var(--accent);
     font-weight: 600;
     text-decoration: none;
   }
@@ -194,7 +196,7 @@ const facts = [
     transition: color 0.3s;
   }
   .next:hover .next-t {
-    color: var(--brass);
+    color: var(--accent);
   }
   @media (max-width: 860px) {
     .layout,

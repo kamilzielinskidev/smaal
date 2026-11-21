@@ -57,7 +57,7 @@ if (breadcrumbs) {
     <script is:inline>
       (function () {
         var d = document.documentElement;
-        d.classList.add('js');
+        d.classList.add('js', 'loading');
         var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduce) d.classList.add('reduce');
         var gl = false;
@@ -66,78 +66,102 @@ if (breadcrumbs) {
           gl = !!(c.getContext('webgl2') || c.getContext('webgl'));
         } catch (e) {}
         if (reduce || !gl || (navigator.deviceMemory || 8) < 4) d.classList.add('no-3d');
+
+        // Loader: czekamy na load, czcionki i pierwszą klatkę sceny 3D (jeśli jest) — najwyżej 6 s.
+        var hero = new Promise(function (r) {
+          addEventListener('smaal:hero-ready', r);
+        });
+        var ready = new Promise(function (r) {
+          addEventListener('load', r);
+        }).then(function () {
+          return Promise.all([document.fonts && document.fonts.ready, !d.classList.contains('no-3d') && document.getElementById('hero') && hero]);
+        });
+        Promise.race([ready, new Promise(function (r) { setTimeout(r, 6000); })]).then(function () {
+          d.classList.remove('loading');
+          dispatchEvent(new Event('smaal:ready'));
+        });
       })();
     </script>
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
   </head>
   <body>
+    <div class="loader" aria-hidden="true">
+      <svg viewBox="0 0 100 84"><path pathLength="1" d="M10 10H90V74H10Z M42 10V33 M10 42H42 M34 42V65" /></svg>
+    </div>
     <Header />
     <main>
       <slot />
     </main>
     <Footer />
-    <p class="concept-pill" role="note">Koncept · treści, zdjęcia, ceny i opinie przykładowe</p>
 
     <script>
       import Lenis from 'lenis';
-      import { gsap } from 'gsap';
-      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+      import { goTo } from '../lib/scroll';
 
-      gsap.registerPlugin(ScrollTrigger);
-      const reduce = document.documentElement.classList.contains('reduce');
-
-      if (!reduce) {
-        const lenis = new Lenis({ lerp: 0.09 });
+      if (!document.documentElement.classList.contains('reduce')) {
+        const lenis = new Lenis({ lerp: 0.09, autoRaf: true });
         (window as any).lenis = lenis;
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((t) => lenis.raf(t * 1000));
-        gsap.ticker.lagSmoothing(0);
-
-        gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
-          gsap.to(el, {
-            opacity: 1,
-            y: 0,
-            duration: 1.2,
-            ease: 'expo.out',
-            delay: Number(el.dataset.delay || 0),
-            scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-          });
-        });
+        if (document.documentElement.classList.contains('loading')) lenis.stop();
+        window.addEventListener('smaal:ready', () => lenis.start());
       }
 
-      // Kotwice na tej samej stronie — płynnie przez Lenis.
+      // Kotwice na tej samej stronie — płynnie przez Lenis, z fokusem na celu.
       document.addEventListener('click', (e) => {
         const a = (e.target as Element).closest('a[href*="#"]') as HTMLAnchorElement | null;
         if (!a || a.pathname !== location.pathname) return;
-        const target = document.querySelector(a.hash);
+        const target = document.querySelector<HTMLElement>(a.hash);
         if (!target) return;
         e.preventDefault();
-        document.documentElement.classList.remove('nav-open');
-        const lenis = (window as any).lenis;
-        lenis ? lenis.scrollTo(target, { duration: 1.6 }) : target.scrollIntoView();
+        goTo(target);
         history.replaceState(null, '', a.hash);
       });
-
-      window.addEventListener('load', () => ScrollTrigger.refresh());
     </script>
 
     <style>
-      .concept-pill {
+      :global(html.loading) {
+        overflow: hidden;
+      }
+      .loader {
         position: fixed;
-        left: 16px;
-        bottom: 16px;
-        z-index: 60;
-        margin: 0;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: rgba(22, 21, 19, 0.78);
-        backdrop-filter: blur(10px);
-        color: var(--stone);
-        font-size: 0.72rem;
-        letter-spacing: 0.04em;
-        border: 1px solid rgba(176, 141, 87, 0.5);
-        pointer-events: none;
-        max-width: calc(100vw - 32px);
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        background: var(--ink);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.7s var(--ease),
+          visibility 0.7s;
+      }
+      :global(html.loading) .loader {
+        opacity: 1;
+        visibility: visible;
+      }
+      .loader svg {
+        width: 76px;
+        fill: none;
+        stroke: var(--brass);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .loader path {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: draw 2.2s var(--ease) infinite;
+      }
+      :global(.reduce) .loader path {
+        animation: none;
+        stroke-dasharray: none;
+      }
+      @keyframes draw {
+        60% {
+          stroke-dashoffset: 0;
+        }
+        100% {
+          stroke-dashoffset: -1;
+        }
       }
     </style>
   </body>

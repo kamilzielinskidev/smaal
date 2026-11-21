@@ -7,47 +7,81 @@ const realizacje = await getCollection('realizacje');
 const cityPages = cities.filter((c) => miasta.some((m) => m.id === c.slug));
 ---
 
-<footer class="site-footer dark">
-  <div class="wrap grid">
-    <div class="brand">
-      <a href="/" class="logo">S<span>-</span>MAAL</a>
-      <p class="muted">{site.tagline}. Siedziba w {site.city}, realizacje w całym województwie śląskim.</p>
+<footer class="site-footer closing dark">
+  <div class="wrap">
+    <div class="close">
+      <h2>Twoje mieszkanie może być <em>następne</em></h2>
+      <p class="muted">Oddzwaniamy w ciągu jednego dnia roboczego.</p>
+      <a href="/#kontakt" class="btn xl">Umów bezpłatną konsultację</a>
     </div>
     <div>
-      <h2 class="h">Kontakt</h2>
-      <address>
-        {site.name}<br />
-        {site.street}<br />
-        {site.postalCode} {site.city}<br />
-        <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a><br />
-        <a href={`mailto:${site.email}`}>{site.email}</a><br />
-        <span class="muted">{site.hours}</span>
-      </address>
+      <div class="grid">
+        <div class="brand">
+          <a href="/" class="logo">S<span>-</span>MAAL</a>
+          <p class="muted">{site.tagline}. Siedziba w Mikołowie, realizacje w całym województwie śląskim.</p>
+        </div>
+        <div>
+          <p class="h">Kontakt</p>
+          <address>
+            {site.name}<br />
+            {site.street}<br />
+            {site.postalCode} {site.city}<br />
+            <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a><br />
+            <a href={`mailto:${site.email}`}>{site.email}</a><br />
+            <span class="muted">{site.hours}</span>
+          </address>
+        </div>
+        <div>
+          <p class="h">Obszar działania</p>
+          <ul>
+            {cityPages.map((c) => <li><a href={`/wykonczenia-wnetrz-${c.slug}`}>Wykończenia wnętrz {c.name}</a></li>)}
+            <li><a href="/#obszar">Cały Śląsk</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="h">Realizacje</p>
+          <ul>
+            {realizacje.map((r) => <li><a href={`/realizacje/${r.id}`}>{r.data.title}</a></li>)}
+          </ul>
+        </div>
+      </div>
+      <div class="bottom muted">
+        <span>© 2026 {site.name}. Koncept strony: treści, zdjęcia, ceny i opinie są przykładowe.</span>
+        <a href="/polityka-prywatnosci">Polityka prywatności</a>
+      </div>
     </div>
-    <div>
-      <h2 class="h">Obszar działania</h2>
-      <ul>
-        {cityPages.map((c) => <li><a href={`/wykonczenia-wnetrz-${c.slug}`}>Wykończenia wnętrz {c.name}</a></li>)}
-        <li><a href="/#obszar">Cały Śląsk</a></li>
-      </ul>
-    </div>
-    <div>
-      <h2 class="h">Realizacje</h2>
-      <ul>
-        {realizacje.map((r) => <li><a href={`/realizacje/${r.id}`}>{r.data.title}</a></li>)}
-      </ul>
-    </div>
-  </div>
-  <div class="wrap bottom muted">
-    <span>© 2026 {site.name}. Koncept strony — treści przykładowe.</span>
-    <a href="/polityka-prywatnosci">Polityka prywatności</a>
   </div>
 </footer>
 
 <style>
+  /* zamknięcie i stopka jako jedna sekcja na jeden ekran: u góry wezwanie, na dole linki */
   .site-footer {
-    padding-block: 90px 110px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: var(--padt) 0 var(--padb);
     background: #0f0e0d;
+    display: flex;
+  }
+  .site-footer > .wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 96px;
+  }
+  .close {
+    display: grid;
+    justify-items: start;
+    gap: 20px;
+  }
+  .close h2 {
+    max-width: 12em;
+  }
+  .btn.xl {
+    width: min(640px, 100%);
+    height: 72px;
+    margin-top: 12px;
+    font: 400 1.4rem/1 var(--serif);
   }
   .grid {
     display: grid;
@@ -90,7 +124,7 @@ const cityPages = cities.filter((c) => miasta.some((m) => m.id === c.slug));
   a {
     text-decoration: none;
   }
-  a:hover {
+  a:not(.btn):hover {
     color: var(--brass-2);
   }
   .bottom {
@@ -98,7 +132,7 @@ const cityPages = cities.filter((c) => miasta.some((m) => m.id === c.slug));
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
-    margin-top: 70px;
+    margin-top: 56px;
     padding-top: 24px;
     border-top: 1px solid var(--line-dark);
     font-size: 0.85rem;
@@ -111,6 +145,16 @@ const cityPages = cities.filter((c) => miasta.some((m) => m.id === c.slug));
   @media (max-width: 560px) {
     .grid {
       grid-template-columns: 1fr;
+    }
+    .btn.xl {
+      height: 48px;
+      font-size: 1.1rem;
+    }
+  }
+  /* telefon: kolumny stopki pod sobą — dwa ekrany */
+  @media (max-width: 639px) {
+    .site-footer {
+      min-height: 200svh;
     }
   }
 </style>

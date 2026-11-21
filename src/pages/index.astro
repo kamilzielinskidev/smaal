@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/sections/Hero.astro';
 import Realizacje from '../components/sections/Realizacje.astro';
+import Jakosc from '../components/sections/Jakosc.astro';
 import Uslugi from '../components/sections/Uslugi.astro';
 import Proces from '../components/sections/Proces.astro';
 import Kalkulator from '../components/sections/Kalkulator.astro';
@@ -15,6 +16,7 @@ import { faqJsonLd } from '../data/faq';
 <Base title="Wykończenia wnętrz pod klucz na Śląsku | S-Maal Mikołów" jsonLd={[faqJsonLd()]}>
   <Hero />
   <Realizacje />
+  <Jakosc />
   <Uslugi />
   <Proces />
   <Kalkulator />
@@ -23,3 +25,45 @@ import { faqJsonLd } from '../data/faq';
   <Faq />
   <Kontakt />
 </Base>
+
+<style is:global>
+  /* jedna sekcja na ekran: każda (poza hero) ma 1 lub 2 ekrany (--h), nagłówek u góry.
+     min-height zamiast height — na niskim ekranie sekcja rośnie zamiast nachodzić na następną */
+  main > section:not(.hero) {
+    box-sizing: border-box;
+    min-height: calc(var(--h, 1) * 100vh);
+    min-height: calc(var(--h, 1) * 100svh);
+    padding: var(--padt) 0 var(--padb);
+  }
+  /* telefon: --hm, gdy po złożeniu w kolumnę treść potrzebuje innej liczby ekranów niż na desktopie */
+  @media (max-width: 639px) {
+    main > section:not(.hero) {
+      min-height: calc(var(--hm, var(--h, 1)) * 100svh);
+    }
+  }
+  main > section:not(.hero) .section-head {
+    margin-bottom: 48px;
+  }
+  /* dwa ekrany jako dwie grupy: druga zaczyna się --padt pod górą drugiego ekranu */
+  @media (min-width: 1024px) {
+    main > section.g2 > .wrap {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      row-gap: calc(var(--padt) + var(--padb));
+      min-height: calc(200svh - var(--padt) - var(--padb));
+      align-items: start;
+    }
+  }
+  @media (max-width: 1023px) {
+    main > section.g2 > .wrap {
+      display: grid;
+      gap: 24px;
+    }
+  }
+  /* tablet: cztery realizacje mieszczą się na jednym ekranie */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    #realizacje {
+      --h: 1 !important;
+    }
+  }
+</style>

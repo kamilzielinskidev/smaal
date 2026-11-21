@@ -9,14 +9,21 @@
   --stone-2: #e9e2d6;
   --brass: #b08d57;
   --brass-2: #c9a774;
-  --muted: #6f6a62;
-  --muted-dark: #a39c90;
+  /* tekst w kolorze mosiądzu: na jasnym tle ciemniejszy (kontrast ≥4.5:1 na stone i stone-2), w .dark zwykły */
+  --accent: #7d5f30;
+  /* szary tekst ≥7:1 na stone-2 i na ink */
+  --muted: #4d4842;
+  --muted-dark: #b0a99d;
   --line: rgba(22, 21, 19, 0.12);
   --line-dark: rgba(243, 238, 230, 0.14);
   --serif: 'Fraunces Variable', Georgia, serif;
   --sans: 'Manrope Variable', system-ui, sans-serif;
   --gutter: clamp(16px, 4vw, 56px);
-  --max: 1320px;
+  /* 1280: przy 1440 margines 80px po obu stronach */
+  --max: 1280px;
+  /* rytm sekcji strony głównej: odstęp od góry i od dołu (sekcja = 1 lub 2 ekrany) */
+  --padt: 120px;
+  --padb: 72px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: light;
 }
@@ -69,18 +76,19 @@ h3 {
   margin: 0;
   font-variation-settings: 'opsz' 144, 'SOFT' 30;
 }
+/* skala: h1 hero (72px przy 1440) > h2 > h3 — każdy poziom jednym rozmiarem */
 h2 {
-  font-size: clamp(2.3rem, 5.4vw, 4.6rem);
+  font-size: clamp(1.75rem, 3.6vw, 3.2rem);
 }
 h3 {
-  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-size: clamp(1.2rem, 1.7vw, 1.5rem);
 }
 p {
   margin: 0;
 }
 em {
   font-style: italic;
-  color: var(--brass);
+  color: var(--accent);
 }
 
 .wrap {
@@ -91,7 +99,14 @@ em {
 .section {
   padding-block: clamp(80px, 12vw, 160px);
 }
+@media (max-width: 639px) {
+  :root {
+    --padt: 96px;
+    --padb: 48px;
+  }
+}
 .dark {
+  --accent: var(--brass);
   background: var(--ink);
   color: var(--stone);
   color-scheme: dark;
@@ -103,18 +118,21 @@ em {
   color: var(--muted);
 }
 
+/* flex-start + kreska na środku pierwszej linii: dłuższy eyebrow zawija się na telefonie */
 .eyebrow {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: var(--accent);
 }
 .eyebrow::before {
   content: '';
+  flex: none;
+  margin-top: 0.8em;
   width: 28px;
   height: 1px;
   background: currentColor;
@@ -136,6 +154,7 @@ em {
   --fg: var(--ink);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 16px 26px;
   border-radius: 999px;
@@ -155,15 +174,17 @@ em {
   transform: translateY(-2px);
   --bg: var(--brass-2);
 }
+/* ghost leży na scenie 3D: przyciemnione, rozmyte tło zamiast przezroczystego, cieńsza krawędź,
+   hover bez skoku na pełną biel */
 .btn.ghost {
-  background: transparent;
+  background: rgba(22, 21, 19, 0.35);
+  backdrop-filter: blur(8px);
   color: currentColor;
-  border-color: currentColor;
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
 }
 .btn.ghost:hover {
-  background: var(--stone);
-  color: var(--ink);
-  border-color: var(--stone);
+  background: rgba(243, 238, 230, 0.1);
+  border-color: currentColor;
 }
 .btn svg {
   width: 16px;
@@ -174,6 +195,15 @@ em {
   outline: 2px solid var(--brass);
   outline-offset: 3px;
 }
+/* fokus z klawiatury nie może lądować pod stałym nagłówkiem (76px) */
+a,
+button,
+input,
+select,
+textarea,
+summary {
+  scroll-margin-top: 96px;
+}
 
 .sr-only {
   position: absolute;
@@ -182,12 +212,6 @@ em {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-
-/* reveal — ukryte tylko gdy JS działa i ruch dozwolony */
-.js:not(.reduce) [data-reveal] {
-  opacity: 0;
-  transform: translateY(36px);
 }
 
 @media (prefers-reduced-motion: reduce) {

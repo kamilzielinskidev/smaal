@@ -2,36 +2,33 @@
 // Opinie przykładowe — do podmiany na prawdziwe (np. z wizytówki Google).
 const reviews = [
   {
-    text: 'Odebraliśmy mieszkanie tydzień przed terminem z harmonogramu. Co piątek dostawaliśmy zdjęcia z budowy, więc nie musieliśmy jeździć z Krakowa.',
+    text: 'Na odbiór przyszliśmy z własną poziomicą i nie znaleźliśmy niczego do poprawy. Fugi w łazience idą w jednej linii przez całą ścianę, a w protokole były pomiary każdej ściany.',
     who: 'Anna i Michał',
     where: 'Katowice, 92 m²',
   },
   {
-    text: 'Najbardziej doceniam kosztorys — każda pozycja rozpisana, a cena z umowy była ceną końcową. Łazienka w spieku wygląda jak z katalogu.',
+    text: 'Remont z wyburzaniem ścian w bloku, a na klatce ani jednego worka gruzu. Po każdym dniu pracy mieszkanie było odkurzone, a sąsiedzi nie mieli żadnych uwag.',
     who: 'Tomasz',
     where: 'Gliwice, 64 m²',
   },
   {
-    text: 'Dom pod klucz w niecałe pół roku. Ekipa sprzątała po sobie codziennie, a kierownik odbierał telefon zawsze — nawet w sobotę.',
+    text: 'Dom pod klucz w niecałe pół roku, a na koniec dostaliśmy go umytego: okna, fugi, podłogi. Meble wnieśliśmy tego samego dnia.',
     who: 'Katarzyna',
     where: 'Mikołów, 186 m²',
   },
 ];
 ---
 
-<section class="section opinie">
+<section class="section opinie" style="--hm: 2">
   <div class="wrap">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">Opinie</span>
-      <h2>Mówią nasi <em>klienci</em></h2>
-      <p class="muted">Opinie poniżej są przykładowe — w wersji produkcyjnej podepniemy prawdziwe recenzje.</p>
+    <div class="section-head">
+      <h2>Opinie <em>klientów</em></h2>
     </div>
     <div class="grid">
       {
         reviews.map((r, i) => (
-          <figure class="review" data-reveal data-delay={i * 0.1}>
-            <span class="tag">Opinia przykładowa</span>
-            <div class="stars" aria-label="5 na 5">
+          <figure class="review">
+            <div class="stars" role="img" aria-label="Ocena 5 na 5">
               ★★★★★
             </div>
             <blockquote>„{r.text}”</blockquote>
@@ -65,23 +62,13 @@ const reviews = [
     background: var(--stone);
     border-radius: 20px;
   }
-  .tag {
-    justify-self: start;
-    font: 600 0.62rem/1 var(--sans);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px dashed var(--muted);
-    color: var(--muted);
-  }
   .stars {
-    color: var(--brass);
+    color: var(--accent);
     letter-spacing: 0.2em;
   }
   blockquote {
     margin: 0;
-    font: 380 1.25rem/1.45 var(--serif);
+    font: 380 1.4rem/1.45 var(--serif);
   }
   figcaption {
     display: grid;

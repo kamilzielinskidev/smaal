@@ -2,7 +2,7 @@
 import { nav } from '../data/site';
 ---
 
-<header class="site-header">
+<header class="site-header nav">
   <div class="bar">
     <a href="/" class="logo" aria-label="S-Maal — strona główna">S<span>-</span>MAAL</a>
     <nav aria-label="Główna nawigacja">
@@ -17,13 +17,26 @@ import { nav } from '../data/site';
 
 <script>
   const header = document.querySelector('.site-header')!;
-  const burger = header.querySelector('.burger')!;
-  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-  burger.addEventListener('click', () => {
-    const open = document.documentElement.classList.toggle('nav-open');
+  const burger = header.querySelector<HTMLButtonElement>('.burger')!;
+  const nav = header.querySelector('nav')!;
+  // otwarte menu blokuje przewijanie (Lenis + natywny touch) i fokus na stronie pod spodem
+  const isOpen = () => document.documentElement.classList.contains('nav-open');
+  const setOpen = (open: boolean) => {
+    document.documentElement.classList.toggle('nav-open', open);
     burger.setAttribute('aria-expanded', String(open));
+    (window as any).lenis?.[open ? 'stop' : 'start']();
+    document.querySelectorAll<HTMLElement>('main, footer').forEach((el) => (el.inert = open));
+    if (open) nav.querySelector('a')!.focus();
+  };
+  burger.addEventListener('click', () => setOpen(!isOpen()));
+  nav.addEventListener('click', (e) => {
+    if ((e.target as Element).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) {
+      setOpen(false);
+      burger.focus();
+    }
   });
 </script>
 
@@ -33,19 +46,23 @@ import { nav } from '../data/site';
     inset: 0 0 auto;
     z-index: 50;
     color: var(--stone);
-    transition:
-      background 0.4s,
-      backdrop-filter 0.4s;
+    transition: background 0.4s;
   }
-  .site-header.scrolled {
-    background: rgba(22, 21, 19, 0.82);
+  /* ten sam wygląd przy każdym położeniu scrolla. Blur na pseudo-elemencie: backdrop-filter na samym
+     nagłówku robił z niego containing block dla fixed nav i panel menu kurczył się do wysokości paska */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(22, 21, 19, 0.92);
     backdrop-filter: blur(14px);
   }
   .bar {
     display: flex;
     align-items: center;
     gap: 32px;
-    width: min(100% - 2 * var(--gutter), 1500px);
+    width: min(100% - 2 * var(--gutter), var(--max));
     margin-inline: auto;
     height: 76px;
   }
@@ -116,8 +133,12 @@ import { nav } from '../data/site';
       background: var(--ink);
       padding: 40px var(--gutter);
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.4s;
+      /* visibility przełącza się po zgaszeniu, ale przy otwarciu od razu — inaczej focus() na linku nie działa */
+      transition:
+        opacity 0.4s,
+        visibility 0s 0.4s;
     }
     ul {
       flex-direction: column;
@@ -127,9 +148,14 @@ import { nav } from '../data/site';
       font: 400 2rem/1.1 var(--serif);
       opacity: 1;
     }
+    :global(html.nav-open) {
+      overflow: hidden;
+    }
     :global(.nav-open) nav {
       opacity: 1;
+      visibility: visible;
       pointer-events: auto;
+      transition: opacity 0.4s;
     }
     :global(.nav-open) .site-header {
       background: var(--ink);

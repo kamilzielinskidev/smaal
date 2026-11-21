@@ -2,13 +2,12 @@
 import Calculator from '../Calculator';
 ---
 
-<section id="kalkulator" class="section dark kalkulator">
+<section id="kalkulator" class="section dark kalkulator" style="--h: 2">
   <div class="wrap">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">Kalkulator</span>
-      <h2>Ile kosztuje Twoje <em>pod klucz</em>?</h2>
+    <div class="section-head">
+      <h2>Ile kosztuje wykończenie <em>pod klucz</em>?</h2>
       <p class="muted">
-        Wybierz metraż, standard i dodatki — w kilka sekund zobaczysz orientacyjne widełki. Wynik przeniesiemy do formularza
+        Wybierz metraż, standard i dodatki, a w kilka sekund zobaczysz orientacyjne widełki. Wynik przeniesiemy do formularza
         konsultacji.
       </p>
     </div>
@@ -19,8 +18,9 @@ import Calculator from '../Calculator';
 <style is:global>
   .calc {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    gap: clamp(28px, 4vw, 64px);
+    /* ta sama linia podziału co pozostałe sekcje dwukolumnowe: połowa, 24px odstępu */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
     align-items: start;
   }
   .calc-controls {
@@ -45,8 +45,9 @@ import Calculator from '../Calculator';
     text-transform: uppercase;
     color: var(--muted-dark);
   }
+  /* liczba poniżej h2 */
   .calc .legend output {
-    font: 380 2rem/1 var(--serif);
+    font: 380 1.5rem/1 var(--serif);
     letter-spacing: 0;
     text-transform: none;
     color: var(--stone);
@@ -87,9 +88,10 @@ import Calculator from '../Calculator';
     --fill: 30%;
     width: 100%;
     appearance: none;
-    height: 2px;
-    background: linear-gradient(90deg, var(--brass) var(--fill), var(--line-dark) var(--fill));
-    outline-offset: 10px;
+    /* 44px celu dotyku, widoczny tor 2px rysowany tłem */
+    height: 44px;
+    background: linear-gradient(90deg, var(--brass) var(--fill), var(--line-dark) var(--fill)) center / 100% 2px no-repeat;
+    outline-offset: -8px;
     cursor: pointer;
   }
   .range::-webkit-slider-thumb {
@@ -318,6 +320,45 @@ import Calculator from '../Calculator';
     font-size: 0.78rem;
     color: var(--muted-dark);
   }
+  .calc-peek {
+    display: none;
+  }
+  /* desktop: kalkulator zajmuje dwa ekrany — standardy i dodatki jako listy, karty z próbką po lewej */
+  @media (min-width: 1101px) {
+    .calc-controls {
+      gap: 56px;
+    }
+    .std-grid,
+    .addon-grid {
+      grid-template-columns: 1fr;
+    }
+    /* tekst wyśrodkowany w pionie obok próbki: puste wiersze 1fr nad i pod */
+    .std-card {
+      grid-template-columns: 240px 1fr;
+      grid-template-rows: 1fr auto auto auto 1fr;
+      column-gap: 24px;
+      padding: 0;
+    }
+    .std-visual {
+      grid-row: 1 / -1;
+      height: 220px;
+      margin: 0;
+    }
+    .std-name {
+      grid-row: 2;
+    }
+    .std-price {
+      grid-row: 3;
+    }
+    .std-mat {
+      grid-row: 4;
+    }
+    .std-name,
+    .std-price,
+    .std-mat {
+      padding-inline: 0 20px;
+    }
+  }
 
   @media (max-width: 1100px) {
     .calc {
@@ -326,6 +367,36 @@ import Calculator from '../Calculator';
     .calc-summary {
       position: relative;
       top: 0;
+      scroll-margin-top: 96px;
+    }
+    .calc-peek {
+      position: sticky;
+      bottom: 12px;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(176, 141, 87, 0.5);
+      background: rgba(31, 29, 26, 0.92);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.7);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--brass);
+    }
+    .calc-peek strong {
+      font: 380 1.3rem/1 var(--serif);
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--stone);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
   }
   @media (max-width: 700px) {

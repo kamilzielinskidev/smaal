@@ -19,15 +19,14 @@ const km = (from: string) => {
 };
 ---
 
-<section id="obszar" class="section obszar">
+<section id="obszar" class="section obszar" style="--hm: 2">
   <div class="wrap grid">
-    <div class="text" data-reveal>
-      <span class="eyebrow">Obszar działania</span>
+    <div class="text">
       <h2>Z Mikołowa na <em>cały</em> Śląsk</h2>
       <p class="muted">
         Mikołów to nasza baza i magazyn. Do Katowic mamy {km('katowice')} km, do Tychów {km('tychy')} km, do Gliwic {
           km('gliwice')
-        } km — dlatego na budowie jesteśmy codziennie, a nie „kiedy po drodze”.
+        } km. Dlatego na budowie jesteśmy codziennie, a nie „kiedy po drodze”.
       </p>
       <ul class="chips">
         {
@@ -40,7 +39,7 @@ const km = (from: string) => {
       </ul>
     </div>
 
-    <figure class="map" data-reveal data-delay="0.1">
+    <figure class="map">
       <svg viewBox="-46 -44 92 90" role="img" aria-label="Mapa miast, w których realizujemy wykończenia, wokół Mikołowa">
         {
           [10, 25, 40].map((r) => (
@@ -51,18 +50,16 @@ const km = (from: string) => {
           ))
         }
         {
-          points.map((p) => {
-            const dot = (
-              <g class:list={['city', { hq: p.hq, linked: p.href }]} transform={`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`}>
-                {p.hq && <circle class="pulse" r="2" />}
-                <circle r={p.hq ? 1.4 : 0.8} />
-                <text x={p.side === 'left' ? -1.8 : 1.8} y="0.9" text-anchor={p.side === 'left' ? 'end' : 'start'}>
-                  {p.hq ? `${p.name} · siedziba` : p.name}
-                </text>
-              </g>
-            );
-            return p.href ? <a href={p.href}>{dot}</a> : dot;
-          })
+          // bez linków w SVG (role="img" ich nie przepuszcza, cel dotyku był 47×11px) — linkują chipy obok
+          points.map((p) => (
+            <g class:list={['city', { hq: p.hq, linked: p.href }]} transform={`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`}>
+              {p.hq && <circle class="pulse" r="2" />}
+              <circle r={p.hq ? 1.4 : 0.8} />
+              <text x={p.side === 'left' ? -1.8 : 1.8} y="0.9" text-anchor={p.side === 'left' ? 'end' : 'start'}>
+                {p.hq ? `${p.name} · siedziba` : p.name}
+              </text>
+            </g>
+          ))
         }
       </svg>
     </figure>
@@ -72,9 +69,9 @@ const km = (from: string) => {
 <style>
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: clamp(32px, 5vw, 80px);
-    align-items: center;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
   }
   .text {
     display: grid;
@@ -123,7 +120,7 @@ const km = (from: string) => {
   }
   .ring text {
     font: 600 1.5px var(--sans);
-    fill: var(--brass);
+    fill: var(--accent);
     text-anchor: middle;
     letter-spacing: 0.1px;
   }
@@ -139,11 +136,6 @@ const km = (from: string) => {
   }
   .city.linked text {
     font-weight: 700;
-    text-decoration: underline;
-    text-decoration-color: var(--brass);
-  }
-  a:hover .city text {
-    fill: var(--brass);
   }
   .city.hq circle {
     fill: var(--brass);
@@ -171,6 +163,14 @@ const km = (from: string) => {
   @media (max-width: 860px) {
     .grid {
       grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .city text {
+      font-size: 2.6px;
+    }
+    .city.hq text {
+      font-size: 3.2px;
     }
   }
 </style>

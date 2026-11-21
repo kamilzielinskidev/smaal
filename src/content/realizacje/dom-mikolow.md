@@ -8,6 +8,8 @@ weeks: 22
 year: 2025
 summary: Dom jednorodzinny pod klucz — trzy łazienki, kominek w spieku i dębowe podłogi w całym domu.
 scope: [Tynki i gładzie, Podłogi dębowe, Okładzina kominka ze spieku, Trzy łazienki, Malowanie, Biały montaż]
+tolerance: 2
+protection: Podłogi, schody, okna i stolarka
 cover: ../../assets/img/dom-2.jpg
 gallery: [../../assets/img/dom.jpg, ../../assets/img/salon-2.jpg, ../../assets/img/lazienka.jpg]
 order: 3

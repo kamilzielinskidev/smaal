@@ -7,15 +7,15 @@ import { heroStages } from '../../lib/stages';
 
 <section id="hero" class="hero dark" aria-labelledby="hero-title">
   <div class="sticky">
-    <MockImg src={fallback} alt="Wykończony salon z jadalnią — przykład" class="fallback" />
+    <MockImg src={fallback} alt="Wykończony salon z jadalnią — przykład" class="fallback" sizes="(orientation: portrait) 150vh, 100vw" />
     <HeroScene client:only="react" />
     <div class="shade" aria-hidden="true"></div>
 
     <div class="wrap copy">
-      <span class="eyebrow">Mikołów · cały Śląsk</span>
+      <span class="eyebrow"><span class="eb"><span>Dokładnie co do milimetra</span><span class="sep"> · </span><span>czysto każdego dnia</span></span></span>
       <h1 id="hero-title">Wykończenia wnętrz <em>pod&nbsp;klucz</em> na&nbsp;Śląsku</h1>
       <p class="lead">
-        Zajmujemy się kompleksowym wykończeniem mieszkań i domów — od stanu deweloperskiego do oddania kluczy. Doradzamy przy wyborze materiałów i pilnujemy terminów.
+        <span class="intro">Wykańczamy mieszkania i domy pod klucz. </span>Ściany odbieramy łatą 2&nbsp;m z odchyłką do 2&nbsp;mm, a po każdym dniu pracy sprzątamy. Po odbiorze zostaje Ci tylko wnieść meble.
       </p>
       <div class="actions">
         <a href="#kontakt" class="btn">Umów bezpłatną konsultację</a>
@@ -35,7 +35,7 @@ import { heroStages } from '../../lib/stages';
           </li>
         ))
       }
-      <span class="bar" aria-hidden="true"><span></span></span>
+      <li class="bar" aria-hidden="true"><span></span></li>
     </ol>
 
     <p class="hint" aria-hidden="true">Przewiń, aby wykończyć mieszkanie</p>
@@ -50,6 +50,7 @@ import { heroStages } from '../../lib/stages';
     const stages = [...hero.querySelectorAll<HTMLElement>('.stage')];
     const bar = hero.querySelector<HTMLElement>('.bar span')!;
     const fade = hero.querySelectorAll<HTMLElement>('.copy, .hint');
+    const actions = hero.querySelector<HTMLElement>('.actions')!;
     let last = 0;
     const update = () => {
       const p = sectionProgress(hero);
@@ -61,11 +62,14 @@ import { heroStages } from '../../lib/stages';
       }
       bar.style.transform = `scaleX(${p})`;
       const f = seg(p, 0.015, 0.09);
+      hero.style.setProperty('--f', String(f));
       fade.forEach((el) => {
         el.style.opacity = String(1 - f);
         el.style.transform = `translateY(${-f * 50}px)`;
-        el.style.visibility = f >= 1 ? 'hidden' : '';
+        el.style.pointerEvents = f >= 1 ? 'none' : '';
       });
+      // h1 zostaje w drzewie dostępności; niewidoczne przyciski nie łapią fokusu
+      actions.inert = f >= 1;
     };
     window.addEventListener('scroll', update, { passive: true });
     update();
@@ -73,8 +77,9 @@ import { heroStages } from '../../lib/stages';
 </script>
 
 <style>
+  /* pełne ekrany: kolejne sekcje zaczynają się na granicy ekranu */
   .hero {
-    height: 420vh;
+    height: 400vh;
     position: relative;
   }
   .sticky {
@@ -107,9 +112,22 @@ import { heroStages } from '../../lib/stages';
     display: grid;
     gap: 26px;
     justify-items: start;
+    isolation: isolate;
   }
+  /* pionowy ekran: makieta wypada pod tekstem — przyciemnienie pod tekstem, znika razem z nim */
+  @media (orientation: portrait) {
+    .copy::before {
+      content: '';
+      position: absolute;
+      inset: -96px calc(-1 * var(--gutter)) -48px;
+      z-index: -1;
+      background: linear-gradient(180deg, transparent, rgba(22, 21, 19, 0.72) 96px, rgba(22, 21, 19, 0.62) 80%, transparent);
+      pointer-events: none;
+    }
+  }
+  /* 72px przy 1440: nagłówek kończy się przed ścianą makiety */
   .copy h1 {
-    font-size: clamp(2.8rem, 6.4vw, 6rem);
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
     max-width: 9.5em;
   }
   .lead {
@@ -227,11 +245,12 @@ import { heroStages } from '../../lib/stages';
     min-height: 100svh;
     padding: 140px 0 60px;
   }
+  /* zdjęcie tylko na pierwszy ekran — rozciągnięte na całą wysokość bloku było rozmyte */
   :global(.no-3d) .sticky :global(.fallback) {
     display: block;
-  }
-  .sticky :global(.fallback .badge) {
-    top: 92px;
+    bottom: auto;
+    height: 100svh;
+    mask-image: linear-gradient(#000 70%, transparent);
   }
   :global(.no-3d) .shade {
     background: linear-gradient(90deg, rgba(22, 21, 19, 0.9), rgba(22, 21, 19, 0.55));
@@ -260,30 +279,91 @@ import { heroStages } from '../../lib/stages';
     display: none;
   }
 
+  /* niski ekran: aktywny etap nachodził na przyciski — etapy wchodzą, gdy tekst hero znika */
+  @media (max-height: 820px) {
+    .stages {
+      opacity: var(--f, 1);
+    }
+  }
+  @media (max-width: 1100px) {
+    .hint {
+      left: auto;
+      right: var(--gutter);
+      translate: none;
+    }
+  }
+
+  /* telefon: tekst przy dolnej krawędzi, makieta ma wolną górę ekranu; mniej treści niż na desktopie */
   @media (max-width: 760px) {
     .shade {
-      background: linear-gradient(180deg, rgba(22, 21, 19, 0.92) 0%, rgba(22, 21, 19, 0.4) 42%, transparent 60%, rgba(22, 21, 19, 0.85) 82%);
+      background: linear-gradient(180deg, rgba(22, 21, 19, 0.6) 0%, transparent 16%, transparent 38%, rgba(22, 21, 19, 0.88) 68%);
     }
     .copy {
-      top: 96px;
+      top: auto;
+      bottom: 20px;
       translate: none;
-      gap: 18px;
+      gap: 14px;
+    }
+    /* eyebrow w dwóch równych liniach zamiast zawiniętego w pół zdania */
+    .eb {
+      display: grid;
+      gap: 2px;
+    }
+    .copy .eyebrow::before,
+    .sep,
+    .intro {
+      display: none;
     }
     .copy h1 {
-      font-size: clamp(2.4rem, 11vw, 3.2rem);
+      font-size: clamp(1.9rem, 8.6vw, 2.6rem);
     }
     .lead {
-      font-size: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+    /* jeden pełny przycisk + „Policz koszt” jako link pod nim */
+    .actions {
+      display: grid;
+      justify-self: stretch;
+      gap: 2px;
+      margin-top: 4px;
+    }
+    .actions :global(.ghost),
+    .actions :global(.ghost:hover) {
+      background: none;
+      border-color: transparent;
+      backdrop-filter: none;
+      padding-block: 12px;
+    }
+    .actions :global(.ghost)::after {
+      content: '→';
     }
     .stages {
       bottom: 64px;
       height: 130px;
+      opacity: var(--f, 1);
     }
     .t {
       font-size: 1.4rem;
     }
     .hint {
       display: none;
+    }
+  }
+  /* niskie telefony (SE, małe Androidy) */
+  @media (max-width: 760px) and (max-height: 600px) {
+    .copy {
+      gap: 10px;
+    }
+    .copy h1 {
+      font-size: clamp(1.7rem, 8.4vw, 2.2rem);
+    }
+    .lead {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .actions :global(.btn:not(.ghost)) {
+      padding-block: 13px;
     }
   }
 </style>

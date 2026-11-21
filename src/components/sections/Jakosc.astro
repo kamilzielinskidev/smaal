@@ -1,0 +1,123 @@
+---
+import MockImg from '../MockImg.astro';
+import photo from '../../assets/img/lazienka-3.jpg';
+
+// Parametry przykładowe — do potwierdzenia z S-Maal.
+const pillars = [
+  {
+    big: '2 mm',
+    sub: 'maks. odchyłka na łacie 2 m',
+    title: 'Dokładność',
+    points: [
+      'Przed startem mierzymy laserem całe mieszkanie, a kosztorys liczymy z wymiarów, nie z rzutu.',
+      'Każdy etap odbieramy łatą i poziomicą laserową, zanim przejdziemy do następnego.',
+      'Płytki rozplanowujemy od osi pomieszczenia, więc docinki wychodzą symetrycznie i bez wąskich pasków.',
+      'Przy odbiorze dostajesz protokół z pomiarami i zdjęciami.',
+    ],
+  },
+  {
+    big: 'codziennie',
+    sub: 'sprzątamy po każdym dniu pracy',
+    title: 'Czystość',
+    points: [
+      'Zanim zaczniemy, zabezpieczamy podłogi, okna, drzwi i klatkę schodową.',
+      'Szlifujemy i tniemy z odciągiem pyłu, więc w reszcie domu nie ma kurzu.',
+      'Odpady wywozimy na bieżąco, nic nie stoi na klatce ani pod blokiem.',
+      'Na koniec myjemy okna, fugi i podłogi. Sprzątanie jest w cenie.',
+    ],
+  },
+];
+---
+
+<section id="jakosc" class="section jakosc" style="--hm: 2">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Dokładność i <em>czystość</em></h2>
+      <p class="muted">Na tym nie oszczędzamy w żadnym standardzie wykończenia, od Komfort po Signature.</p>
+    </div>
+    <div class="grid">
+      <MockImg src={photo} alt="Łazienka z kabiną walk-in i płytkami ułożonymi w linii" sizes="(min-width: 861px) 56vw, 92vw" class="photo" />
+      {
+        pillars.map((p, i) => (
+          <article class="pillar">
+            <p class="big">{p.big}</p>
+            <p class="sub muted">{p.sub}</p>
+            <h3>{p.title}</h3>
+            <ul>
+              {p.points.map((t) => (
+                <li>{t}</li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .jakosc {
+    background: var(--stone-2);
+  }
+  /* zdjęcie + dwa filary w jednym rzędzie, zdjęcie wysokie jak filary */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .grid :global(.photo) {
+    border-radius: 20px;
+    min-height: 320px;
+  }
+  .pillar {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: clamp(24px, 3vw, 36px);
+    border-radius: 20px;
+    background: var(--stone);
+  }
+  .big {
+    /* liczba poniżej h2: czyta się jako dane, nie nagłówek */
+    font: 360 clamp(1.75rem, 2.8vw, 2.5rem) / 1 var(--serif);
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    font-size: 0.9rem;
+  }
+  h3 {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0;
+    display: grid;
+    gap: 12px;
+  }
+  li {
+    position: relative;
+    padding-left: 26px;
+    font-size: 0.95rem;
+  }
+  li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.8em;
+    width: 14px;
+    height: 1px;
+    background: var(--brass);
+  }
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .grid :global(.photo) {
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+    }
+  }
+</style>
